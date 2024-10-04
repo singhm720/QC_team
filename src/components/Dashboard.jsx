@@ -4,14 +4,14 @@ import Navbar from './Navbar'
 import Sidebar from './Sidebar'
 import PPMInfo from '../webpage/PPMInfo'
 import DVRNVR from '../webpage/DVRNVR'
-import SensorStatus from '../webpage/SensorStatus'
+import SenserStatus from '../webpage/senserstatus'
 import RouterInfo from '../webpage/RouterInfo'
 import Infrastructure from '../webpage/Infrastructure'
 import FinalStatus from '../webpage/FinalStatus'
 
 const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
     return (
-            <div className="flex w-full">
+            <div className="flex w-full bg-light">
                 <Sidebar sidebarToggle={sidebarToggle} />
                 <div className={`${sidebarToggle ? "" : "ml-64"} w-full`}>
                     <Navbar
@@ -22,7 +22,7 @@ const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
                         <Routes>
                             <Route path="/ppminfo" element={<PPMInfo />} />
                             <Route path="/dvrnvr" element={<DVRNVR />} />
-                            <Route path="/sensorstatus" element={<SensorStatus />} />
+                            <Route path="/senserstatus" element={<SenserStatus />} />
                             <Route path="/routerinfo" element={<RouterInfo />} />
                             <Route path="/infrastructure" element={<Infrastructure />} />
                             <Route path="/finalstatus" element={<FinalStatus />} />
