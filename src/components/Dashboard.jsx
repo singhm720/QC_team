@@ -11,8 +11,7 @@ import FinalStatus from '../webpage/FinalStatus'
 
 const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
     return (
-        <Router>
-            <div className="flex">
+            <div className="flex w-full">
                 <Sidebar sidebarToggle={sidebarToggle} />
                 <div className={`${sidebarToggle ? "" : "ml-64"} w-full`}>
                     <Navbar
@@ -31,7 +30,6 @@ const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
                     </div>
                 </div>
             </div>
-        </Router>
     )
 }
 
