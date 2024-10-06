@@ -1,9 +1,8 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './Navbar'
-import Sidebar from './Sidebar'
 import PPMInfo from '../webpage/PPMInfo'
-import DVRNVR from '../webpage/DVRNVR'
+import DVRNVR from '../webpage/dvrnvr'
 import SenserStatus from '../webpage/senserstatus'
 import RouterInfo from '../webpage/RouterInfo'
 import Infrastructure from '../webpage/Infrastructure'
@@ -12,7 +11,6 @@ import FinalStatus from '../webpage/FinalStatus'
 const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
     return (
             <div className="flex w-full bg-light">
-                <Sidebar sidebarToggle={sidebarToggle} />
                 <div className={`${sidebarToggle ? "" : "ml-64"} w-full`}>
                     <Navbar
                         sidebarToggle={sidebarToggle}

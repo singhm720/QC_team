@@ -1,12 +1,32 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 import { FaBars, FaBell, FaSearch, FaUserCircle } from 'react-icons/fa'
+import { useLocation } from 'react-router-dom';
 
 const Navbar = ({sidebarToggle, setSidebarToggle}) =>{
+    const location = useLocation();
+    const [pageTitle, setPageTitle] = useState('E-Commerce');
+  
+    // Define a mapping of paths to page names
+    const pageTitles = {
+      '/ppminfo': 'PPM Info',
+      '/dvrnvr': 'DVR/NVR',
+      '/senserstatus': 'Sensor Status',
+      '/routerinfo': 'Router Info',
+      '/infrastructure': 'Infrastructure',
+      '/finalstatus': 'Final Status',
+    };
+  
+    // Update the page title based on the current path
+    useEffect(() => {
+      const currentPath = location.pathname;
+      setPageTitle(pageTitles[currentPath] || 'E-Commerce');
+    }, [location.pathname]); // Re-run this effect whenever the path changes
+  
     return(
         <nav className='bg-gray-800 px-4 py-3 flex justify-between'>
             <div className='flex item-center text-x1'>
                 <FaBars className='text-white me-4 cursor-pointer mt-1' onClick={() => setSidebarToggle(!sidebarToggle)}/>
-                <span className='text-white font-semibold'>E-commerce</span>
+                <span className='text-white font-semibold'>{pageTitle}</span>
             </div>
 
             <div className='flex item-centre gap-x-5'>

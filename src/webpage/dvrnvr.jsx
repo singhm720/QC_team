@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Link } from 'react-router-dom'
+import Navbar from "../components/Navbar";
 
 const DVRNVR = () => {
-    
   return (
     <div className="container">
       <div className="row col-lg-12">

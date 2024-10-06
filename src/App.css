@@ -1,0 +1,22 @@
+/* Hide sidebar by default on smaller screens */
+@media (max-width: 768px) {
+    .sidebar-hidden {
+      display: none;
+    }
+  
+    .sidebar-visible {
+      display: block;
+      position: fixed;
+      z-index: 50;
+      width: 100%;
+      max-width: 250px; /* Optional */
+      height: 100vh;
+      background-color: #1f2937; /* Tailwind's bg-gray-800 */
+    }
+  
+    /* Adjust the content when sidebar is open */
+    .content-shift {
+      margin-left: 250px;
+    }
+  }
+  
