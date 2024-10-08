@@ -8,12 +8,12 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) =>{
   
     // Define a mapping of paths to page names
     const pageTitles = {
-      '/ppminfo': 'PPM Info',
-      '/dvrnvr': 'DVR/NVR',
-      '/senserstatus': 'Sensor Status',
-      '/routerinfo': 'Router Info',
-      '/infrastructure': 'Infrastructure',
-      '/finalstatus': 'Final Status',
+      '/dashboard/ppminfo': 'PPM Info',
+      '/dashboard/dvrnvr': 'DVR/NVR',
+      '/dashboard/senserstatus': 'Sensor Status',
+      '/dashboard/routerinfo': 'Router Info',
+      '/dashboard/infrastructure': 'Infrastructure',
+      '/dashboard/finalstatus': 'Final Status',
     };
   
     // Update the page title based on the current path

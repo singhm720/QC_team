@@ -1,22 +1,48 @@
-import { useState } from 'react'
-import './App.css'
-import Sidebar from './components/Sidebar'
-import Dashboard from './components/Dashboard'
-import { BrowserRouter as Router } from 'react-router-dom';
+import { useState } from 'react';
+import './App.css';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
-const[sidebarToggle, setSidebarToggle] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sidebarToggle, setSidebarToggle] = useState(false);
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+  };
+
   return (
     <Router>
-      <div className='flex'>
-        <Sidebar sidebarToggle={sidebarToggle}/>
-          <Dashboard
-            sidebarToggle={sidebarToggle}
-            setSidebarToggle={setSidebarToggle}
+      <div className="flex">
+        <Routes>
+          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+          
+          {/* Protected Routes for authenticated users */}
+          <Route
+            path="/dashboard/*"
+            element={
+              isLoggedIn ? (
+                <>
+                  <Sidebar sidebarToggle={sidebarToggle} />
+                  <Dashboard
+                    sidebarToggle={sidebarToggle}
+                    setSidebarToggle={setSidebarToggle}
+                  />
+                </>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
-        </div>
+
+          {/* Redirect to login by default */}
+          {/* <Route path="*" element={<Navigate to="/login" />} /> */}
+        </Routes>
+      </div>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;
