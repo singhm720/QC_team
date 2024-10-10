@@ -14,7 +14,7 @@ const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
     <div className="flex w-full bg-light">
       <div className={`${sidebarToggle ? '' : 'ml-64'} w-full`}>
         <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
-        <div className="p-4">
+        <div className="p-2">
           <Routes>
             <Route path='/' element={<Reports/>}/>
             <Route path="ppminfo" element={<PPMInfo />} />
