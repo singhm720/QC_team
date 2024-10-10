@@ -7,6 +7,7 @@ import SenserStatus from '../webpage/senserstatus';
 import RouterInfo from '../webpage/RouterInfo';
 import Infrastructure from '../webpage/Infrastructure';
 import FinalStatus from '../webpage/FinalStatus';
+import Reports from './Reports';
 
 const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
   return (
@@ -15,6 +16,7 @@ const Dashboard = ({ sidebarToggle, setSidebarToggle }) => {
         <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
         <div className="p-4">
           <Routes>
+            <Route path='/' element={<Reports/>}/>
             <Route path="ppminfo" element={<PPMInfo />} />
             <Route path="dvrnvr" element={<DVRNVR />} />
             <Route path="senserstatus" element={<SenserStatus />} />

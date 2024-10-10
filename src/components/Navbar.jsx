@@ -8,6 +8,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) =>{
   
     // Define a mapping of paths to page names
     const pageTitles = {
+      '/dashboard': 'Reports',
       '/dashboard/ppminfo': 'PPM Info',
       '/dashboard/dvrnvr': 'DVR/NVR',
       '/dashboard/senserstatus': 'Sensor Status',
@@ -19,7 +20,7 @@ const Navbar = ({sidebarToggle, setSidebarToggle}) =>{
     // Update the page title based on the current path
     useEffect(() => {
       const currentPath = location.pathname;
-      setPageTitle(pageTitles[currentPath] || 'E-Commerce');
+      setPageTitle(pageTitles[currentPath] || 'QC Team Application');
     }, [location.pathname]); // Re-run this effect whenever the path changes
   
     return(

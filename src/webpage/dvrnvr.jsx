@@ -1,101 +1,154 @@
 import React, { useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Link } from 'react-router-dom'
-import Navbar from "../components/Navbar";
+import { useNavigate } from 'react-router-dom';
+import url from "../config";
 
 const DVRNVR = () => {
-  return (
-    <div className="container">
-      <div className="row col-lg-12">
-        {/* Left aligned buttons */}
-        <div className="col-lg-6">
-        <div className="border border-secondary p-3 rounded">
-            <div className="mb-3">
-              <label htmlFor="dvrmk_id" className="form-label">DVR Make:</label>
-              <input type="text" className="form-control" id="dvrmk_id" placeholder="Enter DVR Make" name="dvrmk_id" />
-            </div>
+    const [formData, setFormData] = useState({
+        dvr_make: '',
+        standalone: '',
+        login_status: '',
+        dashboard_status: '',
+        ntp_setting: '',
+        camera_count: '',
+        hdd_recording_end: '',
+        hdd_recording: '',
+        hdd_capacity: '',
+        sd_recording: '',
+        hdd_recording_start: '',
+        atm_id: '',
+        hdd_serial_number: ''
+    });
 
-            <div className="mb-3">
-              <label htmlFor="stand_id" className="form-label">Standalone</label>
-              <input type="text" className="form-control" id="stand_id" placeholder="Enter Standalone Status" name="stand_id" />
-            </div>
+    const navigate = useNavigate();
 
-            <div className="mb-3">
-              <label htmlFor="logsta_id" className="form-label">DVR Login Status</label>
-              <input type="text" className="form-control" id="logsta_id" placeholder="Enter DVR Status" name="logsta_id" />
-            </div>
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
 
-            <div className="mb-3">
-                <label htmlFor="Dashboard_id" className="form-label">Dashboard 118</label>
-                <input type="text" className="form-control" id="Dashboard_id" placeholder="Enter Dashboard Status" name="Dashboard_id" />
-            </div>
+    const handleSubmit = async () => {
+        try {
+            const response = await fetch(`${url}submit_dvrnvr_info`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
 
-            <div className="mb-3">
-              <label htmlFor="ntp_id" className="form-label">NTP Setting</label>
-              <input type="text" className="form-control" id="ntp_id" placeholder="Enter NTP" name="ntp_id" />
-            </div>
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+            } else {
+                alert(result.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to submit data.');
+        }
+    };
 
-            <div className="mb-3">
-              <label htmlFor="camera_id" className="form-label">Camera Count</label>
-              <input type="text" className="form-control" id="camera_id" placeholder="Enter Camera Count" name="camera_id" />
-            </div>
+    const handleSave = async (e) => {
+        e.preventDefault();
+        await handleSubmit();  // Just save the data
+    };
 
-            <div className="mb-3">
-              <label htmlFor="hddrecend_id" className="form-label">HDD Recording End</label>
-              <input type="text" className="form-control" id="hddrecend_id" placeholder="Enter Recording End time" name="hddrecend_id" />
-            </div>
+    const handleSaveAndNext = async (e) => {
+        e.preventDefault();
+        await handleSubmit();  // Save the data
+        navigate('/dashboard/senserstatus');  // Redirect to the next page after saving
+    };
+
+    return (
+        <div className="container">
+            <form>
+                <div className="row col-lg-12">
+                    {/* Left aligned inputs */}
+                    <div className="col-lg-6">
+                        <div className="border border-secondary p-3 rounded">
+                            <div className="mb-3">
+                                <label htmlFor="dvr_make" className="form-label">DVR Make:</label>
+                                <input type="text" className="form-control" id="dvr_make" name="dvr_make" value={formData.dvr_make} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="standalone" className="form-label">Standalone:</label>
+                                <input type="text" className="form-control" id="standalone" name="standalone" value={formData.standalone} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="login_status" className="form-label">Login Status:</label>
+                                <input type="text" className="form-control" id="login_status" name="login_status" value={formData.login_status} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="dashboard_status" className="form-label">Dashboard Status:</label>
+                                <input type="text" className="form-control" id="dashboard_status" name="dashboard_status" value={formData.dashboard_status} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="ntp_setting" className="form-label">NTP Setting:</label>
+                                <input type="text" className="form-control" id="ntp_setting" name="ntp_setting" value={formData.ntp_setting} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="camera_count" className="form-label">Camera Count:</label>
+                                <input type="text" className="form-control" id="camera_count" name="camera_count" value={formData.camera_count} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="hdd_recording_end" className="form-label">HDD Recording End:</label>
+                                <input type="text" className="form-control" id="hdd_recording_end" name="hdd_recording_end" value={formData.hdd_recording_end} onChange={handleChange} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right aligned inputs */}
+                    <div className="col-lg-6">
+                        <div className="border border-secondary p-3 rounded">
+                            <div className="mb-3">
+                                <label htmlFor="hdd_recording" className="form-label">HDD Recording:</label>
+                                <input type="text" className="form-control" id="hdd_recording" name="hdd_recording" value={formData.hdd_recording} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="hdd_capacity" className="form-label">HDD Capacity:</label>
+                                <input type="text" className="form-control" id="hdd_capacity" name="hdd_capacity" value={formData.hdd_capacity} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="sd_recording" className="form-label">SD Recording:</label>
+                                <input type="text" className="form-control" id="sd_recording" name="sd_recording" value={formData.sd_recording} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="hdd_recording_start" className="form-label">HDD Recording Start:</label>
+                                <input type="text" className="form-control" id="hdd_recording_start" name="hdd_recording_start" value={formData.hdd_recording_start} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="atm_id" className="form-label">ATM ID:</label>
+                                <input type="text" className="form-control" id="atm_id" name="atm_id" value={formData.atm_id} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <label htmlFor="hdd_serial_number" className="form-label">HDD Serial Number:</label>
+                                <input type="text" className="form-control" id="hdd_serial_number" name="hdd_serial_number" value={formData.hdd_serial_number} onChange={handleChange} />
+                            </div>
+
+                            <div className="mb-3">
+                                <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>
+                                <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-        </div>
-
-        {/* Right aligned buttons */}
-        <div className="col-lg-6">
-        <div className="border border-secondary p-3 rounded">
-            <div className="mb-3">
-              <label htmlFor="hddrec_id" className="form-label">HDD recording</label>
-              <input type="text" className="form-control" id="hddrec_id" placeholder="Enter Recording" name="hddrec_id" />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="hddcap_id" className="form-label">HDD Capacity</label>
-              <input type="text" className="form-control" id="hddcap_id" placeholder="Enter HDD Capacity" name="hddcap_id"/>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="sdrec_id" className="form-label">SD Recording</label>
-              <input type="text" className="form-control" id="sdrec_id" placeholder="Enter SD Recording" name="sdrec_id" />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="hddrtec_id" className="form-label">HDD Recording</label>
-              <input type="text" className="form-control" id="hddrtec_id" placeholder="Enter HDD Recording" name="hddrtec_id" />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="hddrecst_id" className="form-label">HDD Recording Start</label>
-              <input type="text" className="form-control" id="hddrecst_id" placeholder="Enter HDD Recording start" name="hddrecst_id" />
-            </div>
-            
-            <div className="mb-3">
-              <label htmlFor="atm_id" className="form-label">HDD Recording End</label>
-              <input type="text" className="form-control" id="hddrec_id" placeholder="Enter ATM ID" name="atm_id" />
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="hddsrno_id" className="form-label">HDD Serial Number</label>
-              <input type="text" className="form-control" id="hddsrno_id" placeholder="Enter HDD Serial Number" name="hddsrno_id" />
-            </div>
-            
-            <div className="mb-3">
-                <button type="button" className="btn btn-success me-2" id="save_id">Save</button>
-                <Link to='/senserstatus'>
-                    <button type="button" className="btn btn-success" id="sane_id">Save & Next</button>
-                </Link>
-            </div>
-
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
-export default DVRNVR
+
+export default DVRNVR;
