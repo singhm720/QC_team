@@ -14,7 +14,6 @@ const Ppminfo = () => {
         checking_date: today,
         secv_id: '',
         qcass_id: '',
-        dvrs_id: '',
         am: 'M',
         engineer_name: '',
         e_code: '',
@@ -75,15 +74,15 @@ const Ppminfo = () => {
                         <div className="border border-secondary p-3 rounded">
                             <div className="mb-3">
                                 <label htmlFor="panel_id" className="form-label">Panel ID:</label>
-                                <input type="text" className="form-control" id="panel_id" placeholder="Enter Panel ID" name="panel_id" value={formData.panel_id} onChange={handleChange} required />
+                                <input type="text" className="form-control" id="panel_id" placeholder="Enter Panel ID" name="panel_id" value={formData.panel_id} onChange={handleChange} required autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="client_id" className="form-label">Client</label>
-                                <input type="text" className="form-control" id="client_id" placeholder="Enter Client" name="client_id" value={formData.client_id} onChange={handleChange} required />
+                                <input type="text" className="form-control" id="client_id" placeholder="Enter Client" name="client_id" value={formData.client_id} onChange={handleChange} required autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="merg_id" className="form-label">Merg</label>
-                                <input type="text" className="form-control" id="merg_id" placeholder="Merg" name="merg_id" value={formData.merg_id} onChange={handleChange} required />
+                                <input type="text" className="form-control" id="merg_id" placeholder="Merg" name="merg_id" value={formData.merg_id} onChange={handleChange} required autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="checkingDate" className="form-label">Checking Date</label>
@@ -99,16 +98,16 @@ const Ppminfo = () => {
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="secv_id" className="form-label">Second Visit</label>
-                                <input type="text" className="form-control" id="secv_id" placeholder="Enter Contact No." name="secv_id" value={formData.secv_id} onChange={handleChange} />
+                                <input type="text" className="form-control" id="secv_id" placeholder="Enter second visit date" name="secv_id" value={formData.secv_id} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="qcass_id" className="form-label">QC Assigned</label>
-                                <input type="text" className="form-control" id="qcass_id" placeholder="Enter QC Name." name="qcass_id" value={formData.qcass_id} onChange={handleChange} />
+                                <input type="text" className="form-control" id="qcass_id" placeholder="Enter QC Name." name="qcass_id" value={formData.qcass_id} onChange={handleChange} autocomplete="off"/>
                             </div>
-                            <div className="mb-3">
+                            {/* <div className="mb-3">
                                 <label htmlFor="dvrs_id" className="form-label">DVR Serial Number</label>
-                                <input type="text" className="form-control" id="dvrs_id" placeholder="Enter DVR S/N No." name="dvrs_id" value={formData.dvrs_id} onChange={handleChange} />
-                            </div>
+                                <input type="text" className="form-control" id="dvrs_id" placeholder="Enter DVR S/N No." name="dvrs_id" value={formData.dvrs_id} onChange={handleChange} autocomplete="off"/>
+                            </div> */}
                         </div>
                     </div>
 
@@ -125,23 +124,23 @@ const Ppminfo = () => {
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="engineer_name" className="form-label">Engineer Name</label>
-                                <input type="text" className="form-control" id="engineer_name" placeholder="Enter Engineer Name" name="engineer_name" value={formData.engineer_name} onChange={handleChange} />
+                                <input type="text" className="form-control" id="engineer_name" placeholder="Enter Engineer Name" name="engineer_name" value={formData.engineer_name} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="e_code" className="form-label">E-Code</label>
-                                <input type="text" className="form-control" id="e_code" placeholder="Enter Employee Code" name="e_code" value={formData.e_code} onChange={handleChange} />
+                                <input type="text" className="form-control" id="e_code" placeholder="Enter Employee Code" name="e_code" value={formData.e_code} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="engineer_mobile" className="form-label">Engineer Mobile Number</label>
-                                <input type="text" className="form-control" id="engineer_mobile" placeholder="Enter Number" name="engineer_mobile" value={formData.engineer_mobile} onChange={handleChange} />
+                                <input type="text" className="form-control" id="engineer_mobile" placeholder="Enter Number" name="engineer_mobile" value={formData.engineer_mobile} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="address_pincode" className="form-label">Address Pincode</label>
-                                <input type="text" className="form-control" id="address_pincode" placeholder="Enter Pincode" name="address_pincode" value={formData.address_pincode} onChange={handleChange} />
+                                <input type="text" className="form-control" id="address_pincode" placeholder="Enter Pincode" name="address_pincode" value={formData.address_pincode} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="atm_id" className="form-label">ATM ID</label>
-                                <input type="text" className="form-control" id="atm_id" placeholder="Enter ATM ID" name="atm_id" value={formData.atm_id} onChange={handleChange} />
+                                <input type="text" className="form-control" id="atm_id" placeholder="Enter ATM ID" name="atm_id" value={formData.atm_id} onChange={handleChange} autocomplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>

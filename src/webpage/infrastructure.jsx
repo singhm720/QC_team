@@ -63,27 +63,27 @@ const Infrastructure = () => {
             <form onSubmit={handleSave}>
               <div className="mb-3">
                 <label htmlFor="core_cable" className="form-label">Core Cable:</label>
-                <input type="text" className="form-control" id="core_cable" placeholder="Enter Core Cable" name="core_cable" value={formData.core_cable} onChange={handleChange} />
+                <input type="text" className="form-control" id="core_cable" placeholder="Enter Core Cable" name="core_cable" value={formData.core_cable} onChange={handleChange} autocomplete="off"/>
               </div>
 
               <div className="mb-3">
                 <label htmlFor="line_nutral" className="form-label">Line-Nutral:</label>
-                <input type="text" className="form-control" id="line_nutral" placeholder="Enter Line-Nutral" name="line_nutral" value={formData.line_nutral} onChange={handleChange} />
+                <input type="text" className="form-control" id="line_nutral" placeholder="Enter Line-Nutral" name="line_nutral" value={formData.line_nutral} onChange={handleChange} autocomplete="off"/>
               </div>
 
               <div className="mb-3">
                 <label htmlFor="line_earth" className="form-label">Line-Earth:</label>
-                <input type="text" className="form-control" id="line_earth" placeholder="Enter Line-Earth" name="line_earth" value={formData.line_earth} onChange={handleChange} />
+                <input type="text" className="form-control" id="line_earth" placeholder="Enter Line-Earth" name="line_earth" value={formData.line_earth} onChange={handleChange} autocomplete="off"/>
               </div>
 
               <div className="mb-3">
                 <label htmlFor="earth_nutral" className="form-label">Earth-Nutral:</label>
-                <input type="text" className="form-control" id="earth_nutral" placeholder="Enter Earth-Nutral" name="earth_nutral" value={formData.earth_nutral} onChange={handleChange} />
+                <input type="text" className="form-control" id="earth_nutral" placeholder="Enter Earth-Nutral" name="earth_nutral" value={formData.earth_nutral} onChange={handleChange} autocomplete="off"/>
               </div>
 
               <div className="mb-3">
                 <label htmlFor="panel_battery_voltage" className="form-label">Panel Battery Voltage:</label>
-                <input type="number" className="form-control" id="panel_battery_voltage" placeholder="Enter Panel Battery Voltage" name="panel_battery_voltage" value={formData.panel_battery_voltage} onChange={handleChange} />
+                <input type="number" className="form-control" id="panel_battery_voltage" placeholder="Enter Panel Battery Voltage" name="panel_battery_voltage" value={formData.panel_battery_voltage} onChange={handleChange} autocomplete="off"/>
               </div>
 
               <div className="mb-3">

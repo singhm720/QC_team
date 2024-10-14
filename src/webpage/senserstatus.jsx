@@ -17,6 +17,16 @@ const SenserStatus = () => {
         videocal_id: ''
     });
 
+    const [comments, setComments] = useState({
+        ntwowayComment: '',
+        smokesComment: '',
+        panicComment: '',
+        pirComment: '',
+        sirenComment: '',
+        relayComment: '',
+        videoCallComment: ''
+    });
+
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -26,14 +36,35 @@ const SenserStatus = () => {
         });
     };
 
+    const handleCommentChange = (e, field) => {
+        setComments({
+            ...comments,
+            [field]: e.target.value
+        });
+    };
+
     const handleSubmit = async () => {
         try {
+            // Prepare the data to be sent
+            const submissionData = {
+                ...formData,
+                ntwoway_id: formData.ntwoway_id === "NO" ? comments.ntwowayComment : formData.ntwoway_id,
+                stwoway_id: formData.stwoway_id === "NO" ? comments.stwowayComment : formData.stwoway_id,
+                smokes_id: formData.smokes_id === "NO" ? comments.smokesComment : formData.smokes_id,
+                panic_id: formData.panic_id === "NO" ? comments.panicComment : formData.panic_id,
+                pir_id: formData.pir_id === "NO" ? comments.pirComment : formData.pir_id,
+                senser_id: formData.senser_id === "NO" ? comments.senserComment : formData.senser_id,
+                siren_status: formData.siren_status === "NO" ? comments.sirenComment : formData.siren_status,
+                relays_id: formData.relays_id === "NO" ? comments.relayComment : formData.relays_id,
+                videocal_id: formData.videocal_id === "NO" ? comments.videoCallComment : formData.videocal_id,
+            };
+
             const response = await fetch(`${url}submit_senser_status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(submissionData)
             });
 
             const result = await response.json();
@@ -72,32 +103,66 @@ const SenserStatus = () => {
 
                         <div className="mb-3">
                             <label htmlFor="ntwoway_id" className="form-label">Normal Two Way Status:</label>
-                            <input type="text" className="form-control" id="ntwoway_id" name="ntwoway_id" value={formData.ntwoway_id} onChange={handleChange} />
+                            <select className="form-select" id="ntwoway_id" name="ntwoway_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.ntwoway_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="ntwowayComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="ntwowayComment" value={comments.ntwowayComment} onChange={(e) => handleCommentChange(e, 'ntwowayComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="stwoway_id" className="form-label">Sim base Two way</label>
-                            <input type="text" className="form-control" id="stwoway_id" name="stwoway_id" value={formData.stwoway_id} onChange={handleChange} />
+                            <label htmlFor="stwoway_id" className="form-label">Sim Base Two Way Status:</label>
+                            <select className="form-select" id="stwoway_id" name="stwoway_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.stwoway_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="stwowayComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="stwowayComment" value={comments.stwowayComment} onChange={(e) => handleCommentChange(e, 'stwowayComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="smokes_id" className="form-label">Smoke Status</label>
-                            <input type="text" className="form-control" id="smokes_id" name="smokes_id" value={formData.smokes_id} onChange={handleChange} />
+                            <label htmlFor="smokes_id" className="form-label">Smoke Status:</label>
+                            <select className="form-select" id="smokes_id" name="smokes_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.smokes_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="smokesComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="smokesComment" value={comments.smokesComment} onChange={(e) => handleCommentChange(e, 'smokesComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="panic_id" className="form-label">Panic</label>
-                            <input type="text" className="form-control" id="panic_id" name="panic_id" value={formData.panic_id} onChange={handleChange} />
-                        </div>
-
-                        <div className="mb-3">
-                            <label htmlFor="pir_id" className="form-label">PIR</label>
-                            <input type="text" className="form-control" id="pir_id" name="pir_id" value={formData.pir_id} onChange={handleChange} />
-                        </div>
-
-                        <div className="mb-3">
-                            <label htmlFor="senser_id" className="form-label">Senser Status</label>
-                            <input type="text" className="form-control" id="senser_id" name="senser_id" value={formData.senser_id} onChange={handleChange} />
+                            <label htmlFor="panic_id" className="form-label">Panic Status:</label>
+                            <select className="form-select" id="panic_id" name="panic_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.panic_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="panicComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="panicComment" value={comments.panicComment} onChange={(e) => handleCommentChange(e, 'panicComment')} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -105,19 +170,83 @@ const SenserStatus = () => {
                 {/* Right aligned inputs */}
                 <div className="col-lg-6">
                     <div className="border border-secondary p-3 rounded">
-                        <div className="mb-3">
-                            <label htmlFor="siren_status" className="form-label">Siren working</label>
-                            <input type="text" className="form-control" id="siren_status" name="siren_status" value={formData.siren_status} onChange={handleChange} />
+                    <div className="mb-3">
+                            <label htmlFor="pir_id" className="form-label">PIR Status:</label>
+                            <select className="form-select" id="pir_id" name="pir_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.pir_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="pirComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="pirComment" value={comments.pirComment} onChange={(e) => handleCommentChange(e, 'pirComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="relays_id" className="form-label">Relay status</label>
-                            <input type="text" className="form-control" id="relays_id" name="relays_id" value={formData.relays_id} onChange={handleChange} />
+                            <label htmlFor="senser_id" className="form-label">Senser Status:</label>
+                            <select className="form-select" id="senser_id" name="senser_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.senser_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="senserComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="senserComment" value={comments.senserComment} onChange={(e) => handleCommentChange(e, 'senserComment')} />
+                                </div>
+                            )}
+                        </div>
+                        <div className="mb-3">
+                            <label htmlFor="siren_status" className="form-label">Siren Status:</label>
+                            <select className="form-select" id="siren_status" name="siren_status" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.siren_status === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="sirenComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="sirenComment" value={comments.sirenComment} onChange={(e) => handleCommentChange(e, 'sirenComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
-                            <label htmlFor="videocal_id" className="form-label">Video Call</label>
-                            <input type="text" className="form-control" id="videocal_id" name="videocal_id" value={formData.videocal_id} onChange={handleChange} />
+                            <label htmlFor="relays_id" className="form-label">Relay Status:</label>
+                            <select className="form-select" id="relays_id" name="relays_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.relays_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="relayComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="relayComment" value={comments.relayComment} onChange={(e) => handleCommentChange(e, 'relayComment')} />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mb-3">
+                            <label htmlFor="videocal_id" className="form-label">Video Call Status:</label>
+                            <select className="form-select" id="videocal_id" name="videocal_id" onChange={handleChange}>
+                                <option value="">Select</option>
+                                <option value="YES">YES</option>
+                                <option value="NO">NO</option>
+                                <option value="NA">NA</option>
+                            </select>
+                            {formData.videocal_id === "NO" && (
+                                <div className="mt-2">
+                                    <label htmlFor="videoCallComment" className="form-label">Comment:</label>
+                                    <input type="text" className="form-control" id="videoCallComment" value={comments.videoCallComment} onChange={(e) => handleCommentChange(e, 'videoCallComment')} />
+                                </div>
+                            )}
                         </div>
 
                         <div className="mb-3">
