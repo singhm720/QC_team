@@ -19,7 +19,7 @@ const DVRNVR = () => {
     });
 
     const navigate = useNavigate();
-
+    const recordId = localStorage.getItem('recordId');
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -29,8 +29,8 @@ const DVRNVR = () => {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch(`${url}submit_dvrnvr_info`, {
-                method: 'POST',
+            const response = await fetch(`${url}update-dvr/${recordId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },

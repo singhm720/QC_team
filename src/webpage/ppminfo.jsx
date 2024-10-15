@@ -30,7 +30,7 @@ const Ppminfo = () => {
     // Function to submit data
     const submitData = async (redirect = false) => {
         try {
-          const response = await fetch(`${url}submit_panel_info`, {
+          const response = await fetch(`${url}create-entry`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,6 +40,8 @@ const Ppminfo = () => {
 
             const data = await response.json();
             if (response.ok) {
+                const createdId = data.id;
+                localStorage.setItem('recordId', createdId);
                 alert(data.message); // Success message
                 if (redirect) {
                     navigate('/dashboard/dvrnvr'); // Redirect if Save & Next is clicked
@@ -78,7 +80,7 @@ const Ppminfo = () => {
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="client_id" className="form-label">Client</label>
-                                <input type="text" className="form-control" id="client_id" placeholder="Enter Client" name="client_id" value={formData.client_id} onChange={handleChange} required autocomplete="off"/>
+                                <input type="text" className="form-control" id="client_id" placeholder="Enter Client" name="client_id" value={formData.client_id} onChange={handleChange} required autoComplete="off"/>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="merg_id" className="form-label">Merg</label>

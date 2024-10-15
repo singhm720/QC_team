@@ -13,7 +13,7 @@ const Infrastructure = () => {
   });
 
   const navigate = useNavigate();
-
+  const recordId = localStorage.getItem('recordId');
   const handleChange = (e) => {
       setFormData({
           ...formData,
@@ -23,8 +23,8 @@ const Infrastructure = () => {
 
   const handleSubmit = async () => {
       try {
-          const response = await fetch(`${url}submit_infrastructure`, { // Corrected the endpoint
-              method: 'POST',
+          const response = await fetch(`${url}update-infra/${recordId}`, { // Corrected the endpoint
+              method: 'PUT',
               headers: {
                   'Content-Type': 'application/json'
               },

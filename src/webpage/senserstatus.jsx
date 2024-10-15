@@ -28,7 +28,7 @@ const SenserStatus = () => {
     });
 
     const navigate = useNavigate();
-
+    const recordId = localStorage.getItem('recordId');
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -59,8 +59,8 @@ const SenserStatus = () => {
                 videocal_id: formData.videocal_id === "NO" ? comments.videoCallComment : formData.videocal_id,
             };
 
-            const response = await fetch(`${url}submit_senser_status`, {
-                method: 'POST',
+            const response = await fetch(`${url}/update-sensors/${recordId}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },

@@ -18,7 +18,7 @@ const RouterInfo = () => {
   });
 
   const navigate = useNavigate(); // Initialize the navigate function
-
+  const recordId = localStorage.getItem('recordId');
   const handleChange = (e) => {
     const { name, value } = e.target;
      if (name === "router_sim" && value === "1") {
@@ -36,8 +36,8 @@ const RouterInfo = () => {
         delete formToSubmit.sim_number2;
       }
 
-      const response = await fetch(`${url}submit_router_info`, {
-        method: 'POST',
+      const response = await fetch(`${url}update-router/${recordId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

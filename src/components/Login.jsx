@@ -4,18 +4,22 @@ import "../App.css";
 import url from "../config";
 
 const Login = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState(''); // Changed from email to username
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch(`${url}login?username=${email}&password=${password}`, {
-      method: 'GET',
+    fetch(`${url}login`, { // Remove query parameters
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json', // Set the content type
+      },
+      body: JSON.stringify({ username, password }), // Send username and password as JSON
     })
       .then(response => response.json())
       .then(data => {
-        if (data.message === "Login successful!") {
+        if (data.message === "Login successful") { // Match the message from backend
           onLoginSuccess(); // Call parent function to set login status
           navigate('/dashboard'); // Redirect to dashboard
         } else {
@@ -27,25 +31,24 @@ const Login = ({ onLoginSuccess }) => {
         alert('There was an error logging in.');
       });
   };
-  
 
   return (
     <div className="addUser">
       <h3>Sign in</h3>
       <form className="addUserForm" onSubmit={handleSubmit}>
         <div className="inputGroup">
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="username">Username:</label> {/* Changed from email to username */}
           <input
             type="text"
-            id="email"
-            name="email"
+            id="username" // Changed from email to username
+            name="username" // Changed from email to username
             autoComplete="off"
-            placeholder="Enter your Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your Username" // Changed placeholder
+            value={username} // Changed from email to username
+            onChange={(e) => setUsername(e.target.value)} // Changed from email to username
             required
           />
-          <label htmlFor="Password">Password:</label>
+          <label htmlFor="password">Password:</label> {/* Changed to lowercase */}
           <input
             type="password"
             id="password"

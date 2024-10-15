@@ -18,21 +18,22 @@ const FinalStatus = () => {
     faulty: '',
     action_taken: ''
   });
-
+  const recordId = localStorage.getItem('recordId');
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${url}submit_final_status`, {
-        method: 'POST',
+      const response = await fetch(`${url}update-final-status/${recordId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
       if (response.ok) {
         alert('Final status data saved successfully!');
+        localStorage.clear();
       } else {
         alert('Failed to save final status data.');
       }
