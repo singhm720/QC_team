@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import url from "../config";
@@ -26,6 +26,23 @@ const SenserStatus = () => {
         relayComment: '',
         videoCallComment: ''
     });
+
+    useEffect(() => {
+        // Retrieve data from sessionStorage
+        const storedData = sessionStorage.getItem("Fetch Data:");
+        if (storedData) {
+            const parsedData = JSON.parse(storedData);
+            const firstItem = parsedData.data[0]; // Access the first object in the data array
+            // Now populate the form fields using the firstItem object
+            setFormData({
+                ...formData,
+                // dvr_make: firstItem.dvr_type || '', // Populate DVR Make with dvr_type
+                // Add other fields similarly as needed
+                hdd_serial_number: firstItem.panel_id || '', // Example of populating another field
+                // Continue to map other properties as necessary
+            });
+        }
+    }, []); // Empty dependency array ensures this runs once on component mount
 
     const navigate = useNavigate();
     const recordId = localStorage.getItem('recordId');

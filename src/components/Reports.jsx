@@ -51,6 +51,11 @@ const Reports = () => {
             sortable: true
         },
         {
+            name: "QC Assign",
+            selector: row => row.qcass_id,
+            sortable: true
+        },
+        {
             name: "Engineer Name",
             selector: row => row.engineer_name,
             sortable: true

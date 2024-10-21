@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate if you're using react-router
 import 'bootstrap/dist/css/bootstrap.min.css';
 import url from "../config";
@@ -27,6 +27,21 @@ const RouterInfo = () => {
       setFormData({ ...formData, [name]: value });
     }
   };
+  useEffect(() => {
+    // Retrieve data from sessionStorage
+    const storedData = sessionStorage.getItem("Fetch Data:");
+    if (storedData) {
+        const parsedData = JSON.parse(storedData);
+        const firstItem = parsedData.data[0]; // Access the first object in the data array
+        // Now populate the form fields using the firstItem object
+        setFormData({
+            ...formData,
+            sim_number1: firstItem.sim_1_no || '', // Populate DVR Make with dvr_type
+            sim_number2: firstItem.sim_2_no || '', // Example of populating another field
+            // Continue to map other properties as necessary
+        });
+    }
+}, []); // Empty dependency array ensures this runs once on component mount
 
   // Function to submit data
   const submitData = async (redirect = false) => {
