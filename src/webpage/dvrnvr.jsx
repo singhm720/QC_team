@@ -19,22 +19,21 @@ const DVRNVR = () => {
         sd_recording: '',
         hdd_serial_number: ''
     });
+    
+    const [errors, setErrors] = useState({}); // State to hold validation errors
 
     const recordId = localStorage.getItem('recordId');
 
     useEffect(() => {
-        // Retrieve data from sessionStorage
         const storedData = sessionStorage.getItem('panelClientData');
         if (storedData) {
             const parsedData = JSON.parse(storedData).data[0];
-            // Now populate the form fields using the firstItem object
             setFormData({
                 ...formData,
-                dvr_make: parsedData.dvr_type || '', // Populate DVR Make with dvr_type
-                // hdd_serial_number: parsedData.panel_id || '',
+                dvr_make: parsedData.dvr_type || ''
             });
         }
-    }, []); // Empty dependency array ensures this runs once on component mount
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -43,7 +42,26 @@ const DVRNVR = () => {
         });
     };
 
+    // Function to validate all fields
+    const validateForm = () => {
+        const newErrors = {};
+
+        Object.keys(formData).forEach((field) => {
+            if (!formData[field]) {
+                newErrors[field] = `${field.replace(/_/g, " ")} is required`;
+            }
+        });
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
+        if (!validateForm()) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+        
         try {
             const response = await fetch(`${url}update-dvr/${recordId}`, {
                 method: 'PUT',
@@ -80,69 +98,47 @@ const DVRNVR = () => {
         <div className="container">
             <form>
                 <div className="row col-lg-12">
-                    {/* Left aligned inputs */}
                     <div className="col-lg-6">
                         <div className="border border-secondary p-3 rounded">
-                            <div className="mb-3">
-                                <label htmlFor="dvr_make" className="form-label">DVR Make:</label>
-                                <input type="text" className="form-control" id="dvr_make" name="dvr_make" value={formData.dvr_make} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="standalone" className="form-label">Standalone:</label>
-                                <input type="text" className="form-control" id="standalone" name="standalone" value={formData.standalone} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="login_status" className="form-label">Login Status:</label>
-                                <input type="text" className="form-control" id="login_status" name="login_status" value={formData.login_status} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="dashboard_status" className="form-label">Dashboard Status:</label>
-                                <input type="text" className="form-control" id="dashboard_status" name="dashboard_status" value={formData.dashboard_status} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="ntp_setting" className="form-label">NTP Setting:</label>
-                                <input type="text" className="form-control" id="ntp_setting" name="ntp_setting" value={formData.ntp_setting} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="camera_count" className="form-label">Camera Count:</label>
-                                <input type="text" className="form-control" id="camera_count" name="camera_count" value={formData.camera_count} onChange={handleChange} autoComplete="off" />
-                            </div>
+                            {Object.keys(formData).slice(0, 6).map((field, index) => (
+                                <div key={index} className="mb-3">
+                                    <label htmlFor={field} className="form-label">
+                                        {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id={field}
+                                        name={field}
+                                        value={formData[field]}
+                                        onChange={handleChange}
+                                        autoComplete="off"
+                                    />
+                                    {errors[field] && <small className="text-danger">{errors[field]}</small>}
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Right aligned inputs */}
                     <div className="col-lg-6">
                         <div className="border border-secondary p-3 rounded">
-                            <div className="mb-3">
-                                <label htmlFor="hdd_recording_end" className="form-label">HDD Recording Start:</label>
-                                <input type="text" className="form-control" id="hdd_recording_end" name="hdd_recording_end" value={formData.hdd_recording_end} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="hdd_recording" className="form-label">HDD Recording End:</label>
-                                <input type="text" className="form-control" id="hdd_recording" name="hdd_recording" value={formData.hdd_recording} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="hdd_capacity" className="form-label">HDD Capacity:</label>
-                                <input type="text" className="form-control" id="hdd_capacity" name="hdd_capacity" value={formData.hdd_capacity} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="sd_recording" className="form-label">SD Recording:</label>
-                                <input type="text" className="form-control" id="sd_recording" name="sd_recording" value={formData.sd_recording} onChange={handleChange} autoComplete="off" />
-                            </div>
-
-                            <div className="mb-3">
-                                <label htmlFor="hdd_serial_number" className="form-label">HDD Serial Number:</label>
-                                <input type="text" className="form-control" id="hdd_serial_number" name="hdd_serial_number" value={formData.hdd_serial_number} onChange={handleChange} autoComplete="off" />
-                            </div>
-
+                            {Object.keys(formData).slice(6).map((field, index) => (
+                                <div key={index} className="mb-3">
+                                    <label htmlFor={field} className="form-label">
+                                        {field.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id={field}
+                                        name={field}
+                                        value={formData[field]}
+                                        onChange={handleChange}
+                                        autoComplete="off"
+                                    />
+                                    {errors[field] && <small className="text-danger">{errors[field]}</small>}
+                                </div>
+                            ))}
                             <div className="mb-3">
                                 <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>
                                 <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>

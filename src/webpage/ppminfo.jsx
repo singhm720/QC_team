@@ -18,7 +18,7 @@ const Ppminfo = () => {
         checking_date: today,
         secv_id: '',
         qcass_id: '',
-        am: 'M',
+        am: '',
         engineer_name: '',
         e_code: '',
         engineer_mobile: '',
@@ -26,6 +26,7 @@ const Ppminfo = () => {
         atm_id: ''
     });
 
+    const [errors, setErrors] = useState({});
     const [clientNames, setClientNames] = useState([]); // State for storing client names
     const [panelIDs, setPanelIDs] = useState([]); // State for storing panel IDs
     const [setamvals, setsetamvals] = useState([]);
@@ -49,6 +50,7 @@ const Ppminfo = () => {
         getareamanager();
     }, []);
 
+    
     // Function to fetch panel IDs based on selected client name
     const fetchPanelIDs = async (clientName) => {
         setIsLoading(true);
@@ -98,6 +100,7 @@ const Ppminfo = () => {
                 [name]: value
             }));
         }
+        setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
     };
     // Function to get data of am fields
     const getareamanager = async () => {
@@ -117,9 +120,8 @@ const Ppminfo = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-    
-    
+    };    
+ 
     // Function to populate fields based on session storage
     const populateFields = (panel_id, client_id) => {
         const storedData = sessionStorage.getItem('panelClientData');
@@ -157,8 +159,33 @@ const Ppminfo = () => {
         }
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.client_id) newErrors.client_id = "Client is required.";
+        if (!formData.panel_id) newErrors.panel_id = "Panel ID is required.";
+        if (!formData.merg_id) newErrors.merg_id = "Merg is required.";
+        if (!formData.checking_date) newErrors.checking_date = "Checking date is required.";
+        if (!formData.engineer_name) newErrors.engineer_name = "Engineer name is required.";
+        if (!formData.e_code) newErrors.e_code = "E-Code is required.";
+        if (!formData.engineer_mobile) newErrors.engineer_mobile = "Engineer mobile is required.";
+        if (!formData.address_pincode) newErrors.address_pincode = "Address pincode is required.";
+        if (!formData.atm_id) newErrors.atm_id = "ATM ID is required.";
+        if (!formData.secv_id) newErrors.secv_id = "Second Visit is required.";
+        if (!formData.qcass_id) newErrors.qcass_id = "QC name is required.";
+        if (!formData.am_name) newErrors.am_name = "Area Manager name is required.";
+        
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     // Function to submit data
     const submitData = async (redirect = false) => {
+        if (!validateForm()) {
+            alert("Please fill in all required fields.");
+            return;
+        }
         try {
             const response = await fetch(`${url}create-entry`, {
                 method: 'POST',
@@ -172,7 +199,6 @@ const Ppminfo = () => {
             if (response.ok) {
                 const createdId = data.id;
                 localStorage.setItem('recordId', createdId);
-                alert(data.message);
                 if (redirect) {
                     navigate('/dashboard/dvrnvr');
                 }
@@ -217,6 +243,7 @@ const Ppminfo = () => {
                                     isSearchable={isSearchable}
                                     required
                                 />
+                                {errors.client_id && <p className="text-danger">{errors.client_id}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="panel_id" className="form-label">Panel ID:</label>
@@ -233,6 +260,7 @@ const Ppminfo = () => {
                                     options={panelIDs}
                                     required
                                 />
+                                {errors.panel_id && <p className="text-danger">{errors.panel_id}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="merg_id" className="form-label">Merg</label>
@@ -247,6 +275,7 @@ const Ppminfo = () => {
                                     required
                                     autoComplete="off"
                                 />
+                                {errors.merg_id && <p className="text-danger">{errors.merg_id}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="checkingDate" className="form-label">Checking Date</label>
@@ -259,6 +288,7 @@ const Ppminfo = () => {
                                     onChange={(e) => { setDate(e.target.value); handleChange(e); }}
                                     required
                                 />
+                                {errors.checking_date && <p className="text-danger">{errors.checking_date}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="secv_id" className="form-label">Second Visit</label>
@@ -272,6 +302,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.secv_id && <p className="text-danger">{errors.secv_id}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="qcass_id" className="form-label">QC Assigned</label>
@@ -285,6 +316,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.qcass_id && <p className="text-danger">{errors.qcass_id}</p>}
                             </div>
                         </div>
                     </div>
@@ -305,6 +337,7 @@ const Ppminfo = () => {
                                 isSearchable={isSearchable}
                                 required
                             />
+                            {errors.am_name && <p className="text-danger">{errors.am_name}</p>}
                         </div>
 
                             <div className="mb-3">
@@ -319,6 +352,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.engineer_name && <p className="text-danger">{errors.engineer_name}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="e_code" className="form-label">E-Code</label>
@@ -332,6 +366,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.e_code && <p className="text-danger">{errors.e_code}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="engineer_mobile" className="form-label">Engineer Mobile Number</label>
@@ -345,6 +380,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.engineer_mobile && <p className="text-danger">{errors.engineer_mobile}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="address_pincode" className="form-label">Address Pincode</label>
@@ -358,6 +394,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.address_pincode && <p className="text-danger">{errors.address_pincode}</p>}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="atm_id" className="form-label">ATM ID</label>
@@ -371,6 +408,7 @@ const Ppminfo = () => {
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />
+                                {errors.atm_id && <p className="text-danger">{errors.atm_id}</p>}
                             </div>
                             <div className="mb-3">
                                 <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>

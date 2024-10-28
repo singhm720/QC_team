@@ -70,22 +70,22 @@ const Reports = () => {
             selector: row => row.final_status,
             sortable: true
         },
-        {
-            name: "Action",
-            cell: row => (
-                <div>
-                    <button className="btn btn-info btn-sm" onClick={() => handleShow(row)}>
-                        Show
-                    </button>{' '}
-                    <button className="btn btn-primary btn-sm" onClick={() => handleEdit(row)}>
-                        Edit
-                    </button>
-                </div>
-            ),
-            ignoreRowClick: true,
-            allowOverflow: true,
-            button: true,
-        }
+        // {
+        //     name: "Action",
+        //     cell: row => (
+        //         <div>
+        //             <button className="btn btn-info btn-sm" onClick={() => handleShow(row)}>
+        //                 Show
+        //             </button>{' '}
+        //             <button className="btn btn-primary btn-sm" onClick={() => handleEdit(row)}>
+        //                 Edit
+        //             </button>
+        //         </div>
+        //     ),
+        //     ignoreRowClick: true,
+        //     allowOverflow: true,
+        //     button: true,
+        // }
     ];
 
     // Handle search input
