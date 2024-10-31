@@ -18,7 +18,7 @@ const Ppminfo = () => {
         checking_date: today,
         secv_id: '',
         qcass_id: '',
-        am: '',
+        am_name: '',
         engineer_name: '',
         e_code: '',
         engineer_mobile: '',
@@ -43,7 +43,7 @@ const Ppminfo = () => {
                     alert(`Error: ${data.error}`);
                 }
             } catch (error) {
-                console.error('Error fetching client names:', error);
+                alert('Error fetching client names:', error);
             }
         };
         fetchClientNames();
@@ -64,14 +64,13 @@ const Ppminfo = () => {
                 alert(`Error: ${data.error}`);
             }
         } catch (error) {
-            console.error('Error fetching panel IDs:', error);
+            alert('Error fetching panel IDs:', error);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleChange = (e, actionMeta) => {
-        debugger;
         const { name, value } = e.target || actionMeta;
 
         if (name === "client_id") {
@@ -116,7 +115,7 @@ const Ppminfo = () => {
                 alert(`Error: ${data.error}`);
             }
         } catch (error) {
-            console.log('Error in Fetching Area Manager:', error);
+            alert('Unable to fetch Area Manager :', error);
         } finally {
             setIsLoading(false);
         }
@@ -138,12 +137,47 @@ const Ppminfo = () => {
             if (panel_id && client_id) {
                 setFormData(prevState => ({
                     ...prevState,
-                    merg_id: `${panel_id}_${client_id}`
+                    merg_id: `${panel_id}${client_id}`
                 }));
+                getmapping(`${panel_id}${client_id}`);
             }
         }
     }
-
+    
+    // Get area manager eng_name eng_emp
+    const getmapping = async (panel_id, client_id) => {
+        try {
+            const response = await fetch(`${url}api/mappings?Panel_Type=${panel_id}`);
+            const data = await response.json();
+            
+            if (response.ok && data.length > 0) { 
+                const mapping = data[0];
+                
+                // Update formData with the specific Area Manager and other mapping details
+                setFormData(prevState => ({
+                    ...prevState,
+                    am_name: mapping.Area_Manager,
+                    engineer_name: mapping.Engineer_Name,
+                    e_code: mapping.Employee_Code
+                }));
+                
+                // Conditionally add the Area Manager to setamvals if it's not already there
+                setsetamvals(prevOptions => {
+                    const isExisting = prevOptions.some(option => option.value === mapping.Area_Manager);
+                    if (!isExisting) {
+                        return [...prevOptions, { value: mapping.Area_Manager, label: mapping.Area_Manager }];
+                    }
+                    return prevOptions;  // Return the existing options if Area Manager is already listed
+                });
+            } else {
+                alert('Mapping Not Found for this merge');
+            }
+        } catch (error) {
+            alert('Error fetching mapping:', error);
+        }
+    };
+    
+    
     // Function to fetch panel and client data based on panel_id and client_id
     const fetchPanelAndClientData = async (clientId, panelId) => {
         try {
@@ -155,7 +189,7 @@ const Ppminfo = () => {
                 alert(`Error: ${data.error}`);
             }
         } catch (error) {
-            console.error('Error fetching panel and client data:', error);
+            alert('Error fetching panel and client data:', error);
         }
     };
 
@@ -199,6 +233,7 @@ const Ppminfo = () => {
             if (response.ok) {
                 const createdId = data.id;
                 localStorage.setItem('recordId', createdId);
+                alert('PPM Info Submitted Successfully')
                 if (redirect) {
                     navigate('/dashboard/dvrnvr');
                 }
@@ -206,7 +241,6 @@ const Ppminfo = () => {
                 alert(`Error: ${data.error}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             alert('There was an error submitting the form.');
         }
     };
