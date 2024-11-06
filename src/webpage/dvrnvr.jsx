@@ -16,17 +16,17 @@ const DVRNVR = () => {
         login_status: '',
         dashboard_status: '',
         ntp_setting: '',
+        sd_recording: '',
+        hdd_recording_start: '',
+        hdd_recording_end: '',
         camera_count: '',
         hdd_capacity: '',
-        sd_recording: '',
-        hdd_serial_number: ''
+        hdd_serial_number: '',
     });
 
     const [errors, setErrors] = useState({});
     const [comments, setComments] = useState({});
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-
+    
     const recordId = localStorage.getItem('recordId');
 
     useEffect(() => {
@@ -61,7 +61,6 @@ const DVRNVR = () => {
 
     const validateForm = () => {
         const newErrors = {};
-
         const fieldsWithComments = [
             { field: 'standalone', commentField: 'standaloneComment' },
             { field: 'login_status', commentField: 'loginComment' },
@@ -69,27 +68,27 @@ const DVRNVR = () => {
             { field: 'ntp_setting', commentField: 'ntpComment' }
         ];
 
-        // Validate required fields
         Object.keys(formData).forEach((field) => {
-            if (!formData[field]) {
-                console.log(`${field} is missing`); // Debugging line
+            if (!formData[field] && field !== 'hdd_recording_start' && field !== 'hdd_recording_end') {
                 newErrors[field] = `${field.replace(/_/g, " ")} is required`;
             }
         });
 
-        // Validate comments for fields set to "No"
         fieldsWithComments.forEach(({ field, commentField }) => {
             if (formData[field] === 'No' && !comments[commentField]) {
                 newErrors[commentField] = `Comment is required for ${field.replace(/_/g, " ")} when "No" is selected`;
             }
         });
 
-        // Validate dates
-        if (!startDate) newErrors.hdd_recording_start = "HDD recording start date is required";
-        if (!endDate) newErrors.hdd_recording_end = "HDD recording end date is required";
+        if (!formData.hdd_recording_start) newErrors.hdd_recording_start = "HDD recording start date is required";
+        if (!formData.hdd_recording_end) newErrors.hdd_recording_end = "HDD recording end date is required";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleDateChange = (field, date) => {
+        setFormData((prev) => ({ ...prev, [field]: date }));
     };
 
     const handleSubmit = async () => {
@@ -101,11 +100,10 @@ const DVRNVR = () => {
         const dataToSubmit = { 
             ...formData, 
             comments,
-            hdd_recording_start: startDate ? format(startDate, 'dd/MM/yyyy') : '',
-            hdd_recording_end: endDate ? format(endDate, 'dd/MM/yyyy') : ''
+            hdd_recording_start: formData.hdd_recording_start ? format(formData.hdd_recording_start, 'dd/MM/yyyy') : '',
+            hdd_recording_end: formData.hdd_recording_end ? format(formData.hdd_recording_end, 'dd/MM/yyyy') : ''
         };
 
-        // Replace "No" selections with the corresponding comment if available
         Object.keys(dataToSubmit).forEach((field) => {
             if (dataToSubmit[field] === "No" && comments[`${field}Comment`]) {
                 dataToSubmit[field] = comments[`${field}Comment`];
@@ -148,7 +146,6 @@ const DVRNVR = () => {
                 <div className="row col-lg-12">
                     <div className="col-lg-6">
                         <div className="border border-secondary p-3 rounded">
-                            {/* DVR Make */}
                             <div className="mb-3">
                                 <label htmlFor="dvr_make" className="form-label">DVR Make:</label>
                                 <input
@@ -163,8 +160,7 @@ const DVRNVR = () => {
                                 {errors.dvr_make && <small className="text-danger">{errors.dvr_make}</small>}
                             </div>
 
-                            {/* Render fields with conditional comments */}
-                           {["standalone", "login_status", "dashboard_status", "ntp_setting", "sd_recording"].map((field) => (
+                            {["standalone", "login_status", "dashboard_status", "ntp_setting", "sd_recording"].map((field) => (
                                 <div key={field} className="mb-3">
                                     <label htmlFor={field} className="form-label">
                                         {field.charAt(0).toUpperCase() + field.slice(1).toLowerCase().replace(/_/g, " ")}:
@@ -192,16 +188,14 @@ const DVRNVR = () => {
                                             autoComplete="off"
                                         />
                                     )}
-                                    {errors[`comment_${field}`] && <small className="text-danger">{errors[`comment_${field}`]}</small>}
+                                    {errors[`${field}Comment`] && <small className="text-danger">{errors[`${field}Comment`]}</small>}
                                 </div>
                             ))}
-
                         </div>
                     </div>
 
                     <div className="col-lg-6">
                         <div className="border border-secondary p-3 rounded">
-                            {/* HDD Recording Start */}
                             <div className="mb-3">
                                 <label htmlFor="hdd_recording_start" className="form-label">HDD Recording Start:</label>
                                 <div className="input-group">
@@ -209,18 +203,16 @@ const DVRNVR = () => {
                                         <BsCalendar2DateFill />
                                     </span>
                                     <DatePicker
-                                        style={{width: '426px'}}
                                         className="form-control"
                                         placeholderText="Select start date"
-                                        selected={startDate}
-                                        onChange={(date) => setStartDate(date)}
+                                        selected={formData.hdd_recording_start}
+                                        onChange={(date) => handleDateChange("hdd_recording_start", date)}
                                         dateFormat="dd/MM/yyyy" 
                                     />
                                 </div>
                                 {errors.hdd_recording_start && <small className="text-danger">{errors.hdd_recording_start}</small>}
                             </div>
 
-                            {/* HDD Recording End */}
                             <div className="mb-3">
                                 <label htmlFor="hdd_recording_end" className="form-label">HDD Recording End:</label>
                                 <div className="input-group">
@@ -228,18 +220,16 @@ const DVRNVR = () => {
                                         <BsCalendar2DateFill />
                                     </span>
                                     <DatePicker
-                                        style={{width: '426px'}}
                                         className="form-control"
                                         placeholderText="Select end date"
-                                        selected={endDate}
-                                        onChange={(date) => setEndDate(date)}
+                                        selected={formData.hdd_recording_end}
+                                        onChange={(date) => handleDateChange("hdd_recording_end", date)}
                                         dateFormat="dd/MM/yyyy"
                                     />
                                 </div>
                                 {errors.hdd_recording_end && <small className="text-danger">{errors.hdd_recording_end}</small>}
                             </div>
 
-                            {/* Camera Count */}
                             <div className="mb-3">
                                 <label htmlFor="camera_count" className="form-label">Camera Count:</label>
                                 <select
@@ -257,7 +247,6 @@ const DVRNVR = () => {
                                 {errors.camera_count && <small className="text-danger">{errors.camera_count}</small>}
                             </div>
 
-                            {/* HDD Capacity */}
                             <div className="mb-3">
                                 <label htmlFor="hdd_capacity" className="form-label">HDD Capacity:</label>
                                 <select
@@ -275,8 +264,7 @@ const DVRNVR = () => {
                                 {errors.hdd_capacity && <small className="text-danger">{errors.hdd_capacity}</small>}
                             </div>
 
-                              {/* HDD Serial Number */}
-                              <div className="mb-3">
+                            <div className="mb-3">
                                 <label htmlFor="hdd_serial_number" className="form-label">HDD Serial Number:</label>
                                 <input
                                     type="text"
@@ -289,6 +277,7 @@ const DVRNVR = () => {
                                 />
                                 {errors.hdd_serial_number && <small className="text-danger">{errors.hdd_serial_number}</small>}
                             </div>
+
                             <div className="mt-4">
                                 <button type="submit" className="btn btn-primary me-2" onClick={handleSave}>Save</button>
                                 <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>
