@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import url from "../config";
@@ -14,7 +14,34 @@ const Infrastructure = () => {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
+  const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
   const recordId = localStorage.getItem('recordId');
+  
+  useEffect(() => {
+    if (mode === "edit" && recordId) {
+      fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
+  }
+  }, [mode, recordId]);
+  
+  const fetchDataForEdit = async (id) => {
+    try {
+        const response = await fetch(`${url}getbyidppminfo/${id}`);
+        const data = await response.json();
+        if (response.ok) {
+            setFormData({
+              core_cable: data.core_cable,
+              line_nutral: data.line_nutral,
+              earth_nutral: data.earth_nutral,
+              panel_battery_voltage: data.panel_battery_voltage,
+            });
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('Error fetching data for edit:', error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -141,7 +168,7 @@ const Infrastructure = () => {
               <div className="mb-3">
                 <label htmlFor="panel_battery_voltage" className="form-label">Panel Battery Voltage:</label>
                 <input
-                  type="number"
+                  type="text"
                   className="form-control"
                   id="panel_battery_voltage"
                   placeholder="Enter Panel Battery Voltage"
