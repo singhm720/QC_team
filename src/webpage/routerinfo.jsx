@@ -19,6 +19,7 @@ const RouterInfo = () => {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
+  const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
   const recordId = localStorage.getItem('recordId');
 
   const handleChange = (e) => {
@@ -41,15 +42,48 @@ const RouterInfo = () => {
         sim_number2: firstItem.sim_2_no || ''
       });
     }
-  }, []);
+    if (mode === "edit" && recordId) {
+      fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
+  }
+  }, [mode, recordId]);
+
+  const fetchDataForEdit = async (id) => {
+    try {
+        const response = await fetch(`${url}getbyidppminfo/${id}`);
+        const data = await response.json();
+        if (response.ok) {
+            // Determine the value for router_sim
+            const routerSimValue = data.sim_number2 !== null ? '2' : '1';
+
+            // Update the formData state with the fetched data
+            setFormData({
+                router_id: data.router_id,
+                ping_break_after_reset: data.ping_break_after_reset,
+                router_signal: data.router_signal,
+                router_sim: routerSimValue, // use updated value
+                antenna_location: data.antenna_location,
+                antenna_type: data.antenna_type,
+                cabling: data.cabling,
+                router_serial_number: data.router_serial_number,
+                sim_number1: data.sim_number1,
+                sim_number2: data.sim_number2,
+            });
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('Error fetching data for edit:', error);
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {};
     if (!formData.router_id) newErrors.router_id = 'Router ID is required';
     if (!formData.ping_break_after_reset) newErrors.ping_break_after_reset = 'Ping Break After Reset is required';
     if (!formData.router_signal) newErrors.router_signal = 'Router Signal is required';
-    if (!formData.antenna_location) newErrors.antenna_location = 'Antina Location is required';
-    if (!formData.antenna_type) newErrors.antenna_type = 'Antina Type is required';
+    if (!formData.antenna_location) newErrors.antenna_location = 'Antenna Location is required';
+    if (!formData.antenna_type) newErrors.antenna_type = 'Antenna Type is required';
     if (!formData.cabling) newErrors.cabling = 'Cabling is required';
     if (!formData.router_serial_number) newErrors.router_serial_number = 'Router Serial Number is required';
     if (!formData.sim_number1) newErrors.sim_number1 = 'SIM Number 1 required';
@@ -96,6 +130,7 @@ const RouterInfo = () => {
       <div className="row col-lg-12">
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
+            {/* Router ID Field */}
             <div className="mb-3">
               <label htmlFor="router_id" className="form-label">Router ID:</label>
               <input
@@ -111,6 +146,7 @@ const RouterInfo = () => {
               {errors.router_id && <div className="text-danger">{errors.router_id}</div>}
             </div>
 
+            {/* Ping Break After Reset */}
             <div className="mb-3">
               <label htmlFor="ping_break_after_reset" className="form-label">Ping Break After Reset:</label>
               <input
@@ -170,12 +206,14 @@ const RouterInfo = () => {
               />
               {errors.antenna_location && <div className="text-danger">{errors.antenna_location}</div>}
             </div>
+            
           </div>
         </div>
 
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
-            <div className="mb-3">
+          
+          <div className="mb-3">
               <label htmlFor="antenna_type" className="form-label">Antenna Type:</label>
               <input
                 type="text"
@@ -188,8 +226,9 @@ const RouterInfo = () => {
                 autoComplete="off"
               />
               {errors.antenna_type && <div className="text-danger">{errors.antenna_type}</div>}
-            </div>
+          </div>
 
+            {/* Cabling */}
             <div className="mb-3">
               <label htmlFor="cabling" className="form-label">Cabling:</label>
               <input
@@ -205,7 +244,7 @@ const RouterInfo = () => {
               {errors.cabling && <div className="text-danger">{errors.cabling}</div>}
             </div>
 
-            <div className="mb-3">
+          <div className="mb-3">
               <label htmlFor="router_serial_number" className="form-label">Router Serial Number:</label>
               <input
                 type="text"
@@ -219,7 +258,8 @@ const RouterInfo = () => {
               />
               {errors.router_serial_number && <div className="text-danger">{errors.router_serial_number}</div>}
             </div>
-
+            
+            {/* SIM Number 1 */}
             <div className="mb-3">
               <label htmlFor="sim_number1" className="form-label">SIM Number 1:</label>
               <input
@@ -235,6 +275,7 @@ const RouterInfo = () => {
               {errors.sim_number1 && <div className="text-danger">{errors.sim_number1}</div>}
             </div>
 
+            {/* SIM Number 2 */}
             {formData.router_sim === '2' && (
               <div className="mb-3">
                 <label htmlFor="sim_number2" className="form-label">SIM Number 2:</label>
@@ -251,9 +292,8 @@ const RouterInfo = () => {
                 {errors.sim_number2 && <div className="text-danger">{errors.sim_number2}</div>}
               </div>
             )}
-
-            <div className="mb-3">
-              <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>
+            <div className="mt-4">
+              <button type="submit" className="btn btn-primary me-2" onClick={handleSave}>Save</button>
               <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>
             </div>
           </div>

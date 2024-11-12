@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import url from "../config";
 
@@ -17,8 +17,46 @@ const FinalStatus = () => {
     faulty: '',
     action_taken: ''
   });
+  
   const [errors, setErrors] = useState({});
+  const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
   const recordId = localStorage.getItem('recordId');
+  
+  useEffect(() => {
+    if (mode === "edit" && recordId) {
+      fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
+  }
+  }, [mode, recordId]);
+
+  const fetchDataForEdit = async (id) => {
+    try {
+        const response = await fetch(`${url}getbyidppminfo/${id}`);
+        const data = await response.json();
+        if (response.ok) {
+            setFormData({
+              remark: data.remark,
+              status: data.status,
+              final_status: data.final_status,
+              assigned_to: data.assigned_to,
+              today: data.today,
+              rectify: data.rectify,
+              month: data.month,
+              quarterly_status: data.quarterly_status,
+              police_station_no: data.police_station_no,
+              fire_station_no: data.fire_station_no,
+              faulty: data.faulty,
+              action_taken: data.action_taken
+
+            });
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('Error fetching data for edit:', error);
+    }
+  };
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
