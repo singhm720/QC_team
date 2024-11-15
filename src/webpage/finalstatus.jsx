@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import url from "../config";
-
+import { useNavigate } from 'react-router-dom';
+import { BsCalendar2DateFill } from "react-icons/bs";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 const FinalStatus = () => {
   const [formData, setFormData] = useState({
     remark: '',
     status: '',
     final_status: '',
     assigned_to: '',
-    today: '',
+    today: null,
     rectify: '',
     month: '',
     quarterly_status: '',
@@ -18,6 +21,7 @@ const FinalStatus = () => {
     action_taken: ''
   });
   
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
   const recordId = localStorage.getItem('recordId');
@@ -57,11 +61,16 @@ const FinalStatus = () => {
     }
   };
 
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+        ...prevData,
+        [name]: value
+    }));
   };
-
+  const handleDateChange = (field, date) => {
+    setFormData((prev) => ({ ...prev, [field]: date }));
+  };
   const validateForm = () => {
     const newErrors = {};
     if (!formData.remark) newErrors.remark = 'Remark is required';
@@ -78,12 +87,12 @@ const FinalStatus = () => {
     if (!formData.action_taken) newErrors.action_taken = 'Action Taken is required';
 
     setErrors(newErrors);
+    console.log(JSON.stringify(formData));
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
     if (!validateForm()) return;
-
     try {
       const response = await fetch(`${url}update-final-status/${recordId}`, {
         method: 'PUT',
@@ -94,6 +103,7 @@ const FinalStatus = () => {
       if (response.ok) {
         alert('Final status data saved successfully!');
         localStorage.clear();
+        navigate('/dashboard');
       } else {
         alert('Failed to save final status data.');
       }
@@ -133,10 +143,26 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="today_id" className="form-label">Today:</label>
-              <input type="date" className="form-control" id="today_id" name="today" value={formData.today} onChange={handleChange} autoComplete="off"/>
-              {errors.today && <div className="text-danger">{errors.today}</div>}
+              <label htmlFor="today_id" className="form-label">
+                Today:
+              </label>
+              <div className="input-group">
+                <span className="input-group-text">
+                  <BsCalendar2DateFill />
+                </span>
+                <DatePicker
+                  className="form-control"
+                  placeholderText="Select Date"
+                  selected={formData.today}
+                  onChange={(date) => handleDateChange("today", date)}
+                  dateFormat="dd/MM/yyyy"
+                />
+              </div>
+              {errors.today && (
+                <small className="text-danger">{errors.today}</small>
+              )}
             </div>
+
 
             <div className="mb-3">
               <label htmlFor="rectify_id" className="form-label">Rectify:</label>
@@ -185,8 +211,24 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <button type="button" className="btn btn-success me-2" id="save_id" onClick={handleSave}>Save</button>
-            </div>
+                  {mode === 'edit' ? (
+                    <>
+                    <button type="button" className="btn btn-success" onClick={handleSave}>
+                      Update
+                    </button>
+                    <p className="text-danger">
+                     Note:- You wont be able to Edit the data once you click on Update
+                  </p>
+                  </>
+                  ) : (
+                    // Show Save and Save & Next buttons when not in edit mode
+                    <>
+                    <button type="button" className="btn btn-success me-2" onClick={handleSave}>
+                      Save
+                    </button>
+                      </>
+                  )}
+                </div>
           </div>
         </div>
       </div>

@@ -293,9 +293,23 @@ const RouterInfo = () => {
               </div>
             )}
             <div className="mt-4">
-              <button type="submit" className="btn btn-primary me-2" onClick={handleSave}>Save</button>
-              <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>
-            </div>
+                  {mode === 'edit' ? (
+                    // Show Update button when in edit mode
+                    <button type="button" className="btn btn-success" onClick={handleSave}>
+                      Update
+                    </button>
+                  ) : (
+                    // Show Save and Save & Next buttons when not in edit mode
+                    <>
+                    <button type="button" className="btn btn-success me-2" onClick={handleSave}>
+                      Save
+                    </button>
+                    <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>
+                      Save & Next
+                    </button>
+                      </>
+                  )}
+                </div>
           </div>
         </div>
       </div>

@@ -181,9 +181,23 @@ const Infrastructure = () => {
               </div>
 
               <div className="mb-3">
-                <button type="button" className="btn btn-success me-2" id="save_id" onClick={handleSave}>Save</button>
-                <button type="button" className="btn btn-success" id="save_next_id" onClick={handleSaveAndNext}>Save & Next</button>
-              </div>
+                  {mode === 'edit' ? (
+                    // Show Update button when in edit mode
+                    <button type="button" className="btn btn-success" onClick={handleSave}>
+                      Update
+                    </button>
+                  ) : (
+                    // Show Save and Save & Next buttons when not in edit mode
+                    <>
+                    <button type="button" className="btn btn-success me-2" onClick={handleSave}>
+                      Save
+                    </button>
+                    <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>
+                      Save & Next
+                    </button>
+                      </>
+                  )}
+                </div>
             </form>
           </div>
         </div>
