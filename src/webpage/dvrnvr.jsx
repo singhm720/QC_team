@@ -154,6 +154,7 @@ const DVRNVR = () => {
   };
 
   const validateForm = () => {
+    debugger;
     const newErrors = {};
   
     // Validate DVR fields
@@ -229,12 +230,8 @@ const DVRNVR = () => {
         hdd_capacity: concatenatedHddCapacity,
         hdd_serial_number: concatenatedHddSerialNumber,
       comments,
-      hdd_recording_start: formData.hdd_recording_start
-        ? format(formData.hdd_recording_start, "dd/MM/yyyy")
-        : "",
-      hdd_recording_end: formData.hdd_recording_end
-        ? format(formData.hdd_recording_end, "dd/MM/yyyy")
-        : "",
+      hdd_recording_start: formData.hdd_recording_start,
+      hdd_recording_end: formData.hdd_recording_end,
     };
 
     Object.keys(dataToSubmit).forEach((field) => {
@@ -242,7 +239,7 @@ const DVRNVR = () => {
         dataToSubmit[field] = comments[`${field}Comment`];
       }
     });
-
+    console.log(JSON.stringify(dataToSubmit))
     try {
       const response = await fetch(`${url}update-dvr/${recordId}`, {
         method: "PUT",
@@ -411,7 +408,7 @@ const DVRNVR = () => {
                   <DatePicker
                     className="form-control"
                     placeholderText="Select start date"
-                    selected={formData.hdd_recording_start}
+                    selected={formData.hdd_recording_start ? new Date(formData.hdd_recording_start) : null}
                     onChange={(date) =>
                       handleDateChange("hdd_recording_start", date)
                     }
@@ -436,7 +433,7 @@ const DVRNVR = () => {
                   <DatePicker
                     className="form-control"
                     placeholderText="Select end date"
-                    selected={formData.hdd_recording_end}
+                    selected={formData.hdd_recording_end ? new Date(formData.hdd_recording_end) : null}
                     onChange={(date) =>
                       handleDateChange("hdd_recording_end", date)
                     }
@@ -505,22 +502,24 @@ const DVRNVR = () => {
                 </div>
               ))}
 
-              <div className="mt-4">
-                <button
-                  type="submit"
-                  className="btn btn-primary me-2"
-                  onClick={handleSave}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={handleSaveAndNext}
-                >
-                  Save & Next
-                </button>
-              </div>
+              <div className="mb-3">
+                  {mode === 'edit' ? (
+                    // Show Update button when in edit mode
+                    <button type="button" className="btn btn-success" onClick={handleSave}>
+                      Update
+                    </button>
+                  ) : (
+                    // Show Save and Save & Next buttons when not in edit mode
+                    <>
+                    <button type="button" className="btn btn-success me-2" onClick={handleSave}>
+                      Save
+                    </button>
+                    <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>
+                      Save & Next
+                    </button>
+                      </>
+                  )}
+                </div>
             </div>
           </div>
         </div>

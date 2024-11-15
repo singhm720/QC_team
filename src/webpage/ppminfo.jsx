@@ -34,6 +34,7 @@ const Ppminfo = () => {
     const [clientNames, setClientNames] = useState([]);
     const [panelIDs, setPanelIDs] = useState([]);
     const [setamvals, setsetamvals] = useState([]);
+    const [isEditMode, setIsEditMode] = useState(false);
 
     const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
     const recordId = localStorage.getItem('recordId');
@@ -93,7 +94,7 @@ const Ppminfo = () => {
                     panel_id: data.panel_id,
                     client_id: data.client_id,
                     merg_id: data.merg_id,
-                    checking_date: data.checking_date.split('T')[0], // format date
+                    checking_date: data.checking_date, // format date
                     secv_id: data.secv_id,
                     qcass_id: data.qcass_id,
                     am_name: data.am,
@@ -279,6 +280,7 @@ const Ppminfo = () => {
             if (response.ok) {
                 const createdId = data.id;
                 localStorage.setItem('recordId', createdId);
+                localStorage.setItem('ppmInfoSaved', 'true'); // Save the status of PPM info
                 alert('PPM Info Submitted Successfully');
                 if (redirect) {
                     navigate('/dashboard/dvrnvr');
@@ -515,8 +517,19 @@ const Ppminfo = () => {
                             </div>
 
                             <div className="mb-3">
-                                <button type="button" className="btn btn-success me-2" onClick={handleSave}>Save</button>
-                                <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>Save & Next</button>
+                            {mode === 'edit' ? (
+                                // Show Update button when in edit mode
+                                <button type="button" className="btn btn-success" onClick={handleSave}>
+                                Update
+                                </button>
+                            ) : (
+                                // Show Save and Save & Next buttons when not in edit mode
+                                <>
+                                <button type="button" className="btn btn-success" onClick={handleSaveAndNext}>
+                                    Save & Next
+                                </button>
+                                </>
+                            )}
                             </div>
                         </div>
                     </div>
