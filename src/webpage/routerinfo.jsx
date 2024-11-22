@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Select from "react-select";
 import url from "../config";
 
 const RouterInfo = () => {
@@ -16,7 +17,11 @@ const RouterInfo = () => {
     sim_number1: '',
     sim_number2: ''
   });
-  const [errors, setErrors] = useState({});
+
+    const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isClearable, setIsClearable] = useState(true);
+    const [isSearchable, setIsSearchable] = useState(true);
 
   const navigate = useNavigate();
   const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
@@ -30,6 +35,28 @@ const RouterInfo = () => {
       ...(name === "router_sim" && value === "1" && { sim_number2: '' }) // Clear sim_number2 if router_sim is 1
     }));
   };
+
+  const antennaOptions = [
+    { value: 'Lobby', label: 'Lobby' },
+    { value: 'Backroom', label: 'Backroom' },
+  ];
+  const antennaTypeOptions = [
+    { value: 'Yagi', label: 'Yagi' },
+    { value: 'Omni', label: 'Omni' },
+    { value: 'Patch', label: 'Patch'}
+  ]
+  const pingBreakOptions = [
+    { value: 'Network Break Yes', label: 'Network Break Yes' },
+    { value: 'Network Break No', label: 'Network Break No' },
+  ];
+  const routerOptions = [
+    { value: '20 & 24', label: '20 & 24' },
+    { value: 'R+R-', label: 'R+R-' },
+  ];
+  const routerSimOptions = [
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+  ];
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("Fetch Data:");
@@ -78,8 +105,9 @@ const RouterInfo = () => {
   };
 
   const validateForm = () => {
+    debugger;
     const newErrors = {};
-    if (!formData.router_id) newErrors.router_id = 'Router ID is required';
+    if (!formData.router_id) newErrors.router_id = 'Router Name is required';
     if (!formData.ping_break_after_reset) newErrors.ping_break_after_reset = 'Ping Break After Reset is required';
     if (!formData.router_signal) newErrors.router_signal = 'Router Signal is required';
     if (!formData.antenna_location) newErrors.antenna_location = 'Antenna Location is required';
@@ -94,6 +122,7 @@ const RouterInfo = () => {
   };
 
   const submitData = async (redirect = false) => {
+
     try {
       const formToSubmit = { ...formData };
       if (formToSubmit.router_sim === '1') delete formToSubmit.sim_number2;
@@ -130,34 +159,38 @@ const RouterInfo = () => {
       <div className="row col-lg-12">
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
-            {/* Router ID Field */}
-            <div className="mb-3">
-              <label htmlFor="router_id" className="form-label">Router ID:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="router_id"
-                placeholder="Enter Router ID"
-                name="router_id"
-                value={formData.router_id}
-                onChange={handleChange}
-                autoComplete="off"
-              />
-              {errors.router_id && <div className="text-danger">{errors.router_id}</div>}
-            </div>
+          <div className="mb-3">
+            <label htmlFor="router_id" className="form-label">Router Connection:</label>
+            <Select
+              className="basic-single"
+              id="router_id"
+              name="router_id"
+              value={routerOptions.find(option => option.value === formData.router_id)}
+              onChange={(selectedOption) =>
+                handleChange({ target: { name: 'router_id', value: selectedOption?.value } })
+              }
+              options={routerOptions}
+              isClearable={true} // Allow clearing the selection
+              isSearchable={true} // Allow searching through options
+              placeholder="Select Router Connection.."
+            />
+            {errors.router_id && <div className="text-danger">{errors.router_id}</div>}
+          </div>
 
-            {/* Ping Break After Reset */}
             <div className="mb-3">
               <label htmlFor="ping_break_after_reset" className="form-label">Ping Break After Reset:</label>
-              <input
-                type="text"
-                className="form-control"
+              <Select
+                className="basic-single"
                 id="ping_break_after_reset"
-                placeholder="Enter Ping Break After Reset"
                 name="ping_break_after_reset"
-                value={formData.ping_break_after_reset}
-                onChange={handleChange}
-                autoComplete="off"
+                value={pingBreakOptions.find(option => option.value === formData.ping_break_after_reset)}
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'ping_break_after_reset', value: selectedOption?.value } })
+                }
+                options={pingBreakOptions}
+                isClearable={true} // Allow clearing the selection
+                isSearchable={true} // Allow searching within options
+                placeholder="Select Ping Break After Reset.."
               />
               {errors.ping_break_after_reset && <div className="text-danger">{errors.ping_break_after_reset}</div>}
             </div>
@@ -179,34 +212,39 @@ const RouterInfo = () => {
 
             <div className="mb-3">
               <label htmlFor="router_sim" className="form-label">Router SIM:</label>
-              <select
-                className="form-select"
+              <Select
+                className="basic-single"
                 id="router_sim"
                 name="router_sim"
-                value={formData.router_sim}
-                onChange={handleChange}
-              >
-                <option value="1">1</option>
-                <option value="2">2</option>
-              </select>
+                value={routerSimOptions.find(option => option.value === formData.router_sim)}
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'router_sim', value: selectedOption?.value } })
+                }
+                options={routerSimOptions}
+                isClearable={true} // Allow clearing the selection
+                isSearchable={true} // Allow searching through options
+                placeholder="Select Router SIM.."
+              />
               {errors.router_sim && <div className="text-danger">{errors.router_sim}</div>}
             </div>
 
             <div className="mb-3">
               <label htmlFor="antenna_location" className="form-label">Antenna Location:</label>
-              <input
-                type="text"
-                className="form-control"
+              <Select
+                className="basic-single"
                 id="antenna_location"
-                placeholder="Enter Antenna Location"
                 name="antenna_location"
-                value={formData.antenna_location}
-                onChange={handleChange}
-                autoComplete="off"
+                value={antennaOptions.find(option => option.value === formData.antenna_location)}
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'antenna_location', value: selectedOption?.value } })
+                }
+                options={antennaOptions}
+                isClearable={isClearable}
+                isSearchable={isSearchable}
+                placeholder="Select Antenna Location.."
               />
               {errors.antenna_location && <div className="text-danger">{errors.antenna_location}</div>}
             </div>
-            
           </div>
         </div>
 
@@ -214,19 +252,23 @@ const RouterInfo = () => {
           <div className="border border-secondary p-3 rounded">
           
           <div className="mb-3">
-              <label htmlFor="antenna_type" className="form-label">Antenna Type:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="antenna_type"
-                placeholder="Enter Antenna Type"
-                name="antenna_type"
-                value={formData.antenna_type}
-                onChange={handleChange}
-                autoComplete="off"
-              />
-              {errors.antenna_type && <div className="text-danger">{errors.antenna_type}</div>}
-          </div>
+          <label htmlFor="antenna_type" className="form-label">Antenna Type:</label>
+          <Select
+            className="basic-single"
+            id="antenna_type"
+            name="antenna_type"
+            value={antennaTypeOptions.find(option => option.value === formData.antenna_type)}
+            onChange={(selectedOption) =>
+              handleChange({ target: { name: 'antenna_type', value: selectedOption?.value } })
+            }
+            options={antennaTypeOptions}
+            isClearable={isClearable}
+            isSearchable={isSearchable}
+            placeholder="Select Antenna Type.."
+          />
+          {errors.antenna_type && <div className="text-danger">{errors.antenna_type}</div>}
+        </div>
+
 
             {/* Cabling */}
             <div className="mb-3">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import url from "../config";
+import Select from "react-select";
 import { BsCalendar2DateFill } from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -17,6 +18,8 @@ const DVRNVR = () => {
     dashboard_status: "",
     ntp_setting: "",
     sd_recording: "",
+    hddstatus_id:"",
+    hddrecording_mode:"",
     hdd_recording_start: "",
     hdd_recording_end: "",
     camera_count: "",
@@ -28,6 +31,9 @@ const DVRNVR = () => {
   const [comments, setComments] = useState({});
   const mode = new URLSearchParams(location.search).get("mode"); // check mode (new or edit)
   const recordId = localStorage.getItem("recordId");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClearable, setIsClearable] = useState(true);
+  const [isSearchable, setIsSearchable] = useState(true);
   const [dvrs, setDvrs] = useState([{ dvr_make: "", camera_count: "" }]);
   const [hdds, setHdds] = useState([{ hdd_capacity: '', hdd_serial_number: '' }]);
 
@@ -73,11 +79,11 @@ const DVRNVR = () => {
 
       setDvrs(dvrs); // Set the DVRs array
       setHdds(hdds); // Set the HDDs array
-        
         setFormData({
           hdd_recording_start: data.hdd_recording_start || "",
           hdd_recording_end: data.hdd_recording_end || "",
-          
+          hddstatus_id: data.hddstatus_id,
+          hddrecording_mode: data.hddrecording_mode,
           // Apply dropdown/comment logic for each specific field
           standalone: handleDropdownWithComment(data.standalone).dropdownValue,
           login_status: handleDropdownWithComment(data.login_status).dropdownValue,
@@ -88,10 +94,10 @@ const DVRNVR = () => {
         // Setting comments separately if the field value requires it
         setComments({
           standaloneComment: handleDropdownWithComment(data.standalone).comment,
-          loginComment: handleDropdownWithComment(data.login_status).comment,
-          dashboardComment: handleDropdownWithComment(data.dashboard_status).comment,
-          ntpComment: handleDropdownWithComment(data.ntp_setting).comment,
-          sdComment: handleDropdownWithComment(data.sd_recording).comment,
+          login_statusComment: handleDropdownWithComment(data.login_status).comment,
+          dashboard_statusComment: handleDropdownWithComment(data.dashboard_status).comment,
+          ntp_settingComment: handleDropdownWithComment(data.ntp_setting).comment,
+          sd_recordingComment: handleDropdownWithComment(data.sd_recording).comment,
         });
       } else {
         alert(`Error: ${data.error}`);
@@ -154,7 +160,6 @@ const DVRNVR = () => {
   };
 
   const validateForm = () => {
-    debugger;
     const newErrors = {};
   
     // Validate DVR fields
@@ -176,16 +181,13 @@ const DVRNVR = () => {
         newErrors[`hdd_serial_number_${index}`] = `HDD serial number is required for HDD ${index + 1}`;
       }
     });
-  
-    // Validate standalone, login_status, etc. with conditional comments
     const fieldsWithComments = [
       { field: "standalone", commentField: "standaloneComment" },
-      { field: "login_status", commentField: "loginComment" },
-      { field: "dashboard_status", commentField: "dashboardComment" },
-      { field: "ntp_setting", commentField: "ntpComment" },
-      { field: "sd_recording", commentField: "sdComment" },
+      { field: "login_status", commentField: "login_statusComment" },
+      { field: "dashboard_status", commentField: "dashboard_statusComment" },
+      { field: "ntp_setting", commentField: "ntp_settingComment" },
+      { field: "sd_recording", commentField: "sd_recordingComment" },
     ];
-  
     fieldsWithComments.forEach(({ field, commentField }) => {
       if (!formData[field]) {
         newErrors[field] = `${field.replace(/_/g, " ")} is required`;
@@ -222,7 +224,6 @@ const DVRNVR = () => {
       // Concatenate HDD fields
       const concatenatedHddCapacity = hdds.map((hdd) => hdd.hdd_capacity).join(" + ");
       const concatenatedHddSerialNumber = hdds.map((hdd) => hdd.hdd_serial_number).join(" + ");
-
     const dataToSubmit = {
       ...formData,
         dvr_make: concatenatedDvrMake,
@@ -239,7 +240,6 @@ const DVRNVR = () => {
         dataToSubmit[field] = comments[`${field}Comment`];
       }
     });
-    console.log(JSON.stringify(dataToSubmit))
     try {
       const response = await fetch(`${url}update-dvr/${recordId}`, {
         method: "PUT",
@@ -397,6 +397,47 @@ const DVRNVR = () => {
           )}
         </div>
       ))}
+
+      <div className="mb-3">
+        <label htmlFor="hddstatus_id" className="form-label">HDD Status:</label>
+        <Select
+          className="basic-single"
+          classNamePrefix="select"
+          name="hddstatus_id"
+          id="hddstatus_id"
+          value={{ value: formData.hddstatus_id, label: formData.hddstatus_id }}
+          onChange={(value) => handleChange({ target: { name: 'hddstatus_id', value: value?.value } })}
+          options={[
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
+          ]}
+          isClearable={isClearable}
+          isSearchable={isSearchable}
+          required
+        />
+        {errors.hddstatus_id && <p className="text-danger">{errors.hddstatus_id}</p>}
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="hddrecording_mode" className="form-label">HDD Recording Mode:</label>
+        <Select
+          className="basic-single"
+          classNamePrefix="select"
+          name="hddrecording_mode"
+          id="hddrecording_mode"
+          value={{ value: formData.hddrecording_mode, label: formData.hddrecording_mode }}
+          onChange={(value) => handleChange({ target: { name: 'hddrecording_mode', value: value?.value } })}
+          options={[
+            { value: 'Motion', label: 'Motion' },
+            { value: 'Continuous', label: 'Continuous' },
+          ]}
+          isClearable={isClearable}
+          isSearchable={isSearchable}
+          required
+        />
+        {errors.hddrecording_mode && <p className="text-danger">{errors.hddrecording_mode}</p>}
+      </div>
+
       <div className="mb-3">
                 <label htmlFor="hdd_recording_start" className="form-label">
                   HDD Recording Start:
@@ -453,11 +494,7 @@ const DVRNVR = () => {
           <div className="col-lg-6">
             <div className="border border-secondary p-3 rounded">
             {[
-                "standalone",
-                "login_status",
-                "dashboard_status",
-                "ntp_setting",
-                "sd_recording",
+              "standalone","login_status","dashboard_status","ntp_setting","sd_recording",
               ].map((field) => (
                 <div key={field} className="mb-3">
                   <label htmlFor={field} className="form-label">
