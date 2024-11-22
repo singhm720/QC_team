@@ -17,6 +17,11 @@ const Reports = () => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const navigate = useNavigate();
+    //function to handle new button click
+    const handleNew = () =>{
+        localStorage.clear();
+        navigate('/dashboard/ppminfo');
+    }
     // Function to handle edit button click
     const handleEdit = (row) => {
         // Save data to localStorage
@@ -38,8 +43,8 @@ const Reports = () => {
                  // Sort data: non-"Ok" status first
                  const sortedData = dataArray.sort((a, b) => {
                     
-                    if (a.final_status !== "OK" && b.final_status === "OK") return -1;
-                    if (a.final_status === "OK" && b.final_status !== "OK") return 1;
+                    if (a.status !== "OK" && b.status === "OK") return -1;
+                    if (a.status === "OK" && b.status !== "OK") return 1;
                     return 0;
                 });
                 setApiData(sortedData);
@@ -84,14 +89,14 @@ const Reports = () => {
             sortable: true
         },
         {
-            name: "Final Status",
-            selector: row => row.final_status,
+            name: "Status",
+            selector: row => row.status,
             sortable: true
         },
         {
             name: "Action",
             cell: row => (
-                row.final_status && row.final_status.toUpperCase() !== "OK" ? (
+                row.status && row.status.toUpperCase() !== "OK" ? (
                     <button
                         className="btn btn-primary btn-sm"
                         onClick={() => handleEdit(row)}
@@ -222,7 +227,7 @@ const Reports = () => {
                 </div>
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-3">
                 <input
                     type="text"
                     placeholder="Search By Panel ID"
@@ -230,6 +235,14 @@ const Reports = () => {
                     value={searchTerm}
                     onChange={handleChange}
                 />
+            </div>
+            <div className='col-md-1'>
+                <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleNew()}
+                    >
+                        New
+                </button>
             </div>
         </div>
 
