@@ -93,6 +93,7 @@ const FinalStatus = () => {
 
   const handleSave = async () => {
     if (!validateForm()) return;
+    console.log(JSON.stringify(formData));
     try {
       const response = await fetch(`${url}update-final-status/${recordId}`, {
         method: 'PUT',

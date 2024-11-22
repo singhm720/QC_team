@@ -15,11 +15,12 @@ const Ppminfo = () => {
     const [isClearable, setIsClearable] = useState(true);
     const [isSearchable, setIsSearchable] = useState(true);
     const [date, setDate] = useState(today);
+    
     const [formData, setFormData] = useState({
         panel_id: '',
         client_id: '',
         merg_id: '',
-        checking_date: today,
+        checking_date: '',
         secv_id: '',
         qcass_id: '',
         am_name: '',
@@ -82,7 +83,8 @@ const Ppminfo = () => {
 
     const handleDateChange = (field, date) => {
         setFormData((prev) => ({ ...prev, [field]: date }));
-      };
+    };
+
     // Fetch data for editing
     const fetchDataForEdit = async (id) => {
         try {
@@ -229,6 +231,7 @@ const Ppminfo = () => {
             }
         }
     }
+
     // Get area manager eng_name eng_emp
     const getmapping = async (panel_id, client_id) => {
         try {
@@ -261,6 +264,7 @@ const Ppminfo = () => {
             alert('Error fetching mapping:', error);
         }
     };
+
     // Submit form data
     const submitData = async (redirect = false) => {
         if (!validateForm()) {
@@ -293,10 +297,36 @@ const Ppminfo = () => {
         }
     };
 
+    //update Data
+    const updateData = async () => {
+        if (!validateForm()) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+        try {
+            const response = await fetch(`${url}update-entry/${recordId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ...formData, checking_date: date }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('PPM Info Updated Successfully');
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            alert('There was an error submitting the form.');
+        }
+    };
+
     // Save data
-    const handleSave = async (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
-        await submitData();
+        await updateData();
     };
 
     // Save & Next
@@ -519,7 +549,7 @@ const Ppminfo = () => {
                             <div className="mb-3">
                             {mode === 'edit' ? (
                                 // Show Update button when in edit mode
-                                <button type="button" className="btn btn-success" onClick={handleSave}>
+                                <button type="button" className="btn btn-success" onClick={handleUpdate}>
                                 Update
                                 </button>
                             ) : (

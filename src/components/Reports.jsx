@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BsCalendar2DateFill } from 'react-icons/bs';
 import { BsFileEarmarkExcelFill } from "react-icons/bs";
+import { useNavigate } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import DataTable from 'react-data-table-component';
 import './Reports.css';
@@ -15,6 +16,17 @@ const Reports = () => {
     const [records, setRecords] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
+    const navigate = useNavigate();
+    // Function to handle edit button click
+    const handleEdit = (row) => {
+        // Save data to localStorage
+        localStorage.setItem('ppmInfoSaved', true);
+        localStorage.setItem('recordId', row.id); // Replace with the correct unique ID field (e.g., `row.id`)
+
+        // Redirect to dashboard/ppminfo with query params
+        navigate('/dashboard/ppminfo?mode=edit');
+    };
+
     // Fetch data from API
     useEffect(() => {
         const fetchData = async () => {
@@ -22,8 +34,16 @@ const Reports = () => {
                 const response = await fetch(`${url}getallppminfo`);
                 const result = await response.json();
                 const dataArray = Array.isArray(result) ? result : [result];
-                setApiData(dataArray);
-                setRecords(dataArray); // Initially display all records
+
+                 // Sort data: non-"Ok" status first
+                 const sortedData = dataArray.sort((a, b) => {
+                    
+                    if (a.final_status !== "OK" && b.final_status === "OK") return -1;
+                    if (a.final_status === "OK" && b.final_status !== "OK") return 1;
+                    return 0;
+                });
+                setApiData(sortedData);
+                setRecords(sortedData); // Initially display all records
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -68,22 +88,22 @@ const Reports = () => {
             selector: row => row.final_status,
             sortable: true
         },
-        // {
-        //     name: "Action",
-        //     cell: row => (
-        //         <div>
-        //             <button className="btn btn-info btn-sm" onClick={() => handleShow(row)}>
-        //                 Show
-        //             </button>{' '}
-        //             <button className="btn btn-primary btn-sm" onClick={() => handleEdit(row)}>
-        //                 Edit
-        //             </button>
-        //         </div>
-        //     ),
-        //     ignoreRowClick: true,
-        //     allowOverflow: true,
-        //     button: true,
-        // }
+        {
+            name: "Action",
+            cell: row => (
+                row.final_status && row.final_status.toUpperCase() !== "OK" ? (
+                    <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleEdit(row)}
+                    >
+                        Edit
+                    </button>
+                ) : null
+            ),
+            ignoreRowClick: true,
+            allowOverflow: true,
+            button: true,
+        }
     ];
 
     // Custom styles for DataTable
