@@ -20,6 +20,7 @@ const DVRNVR = () => {
     sd_recording: "",
     hddstatus_id:"",
     hddrecording_mode:"",
+    dvr_serialno:"",
     hdd_recording_start: "",
     hdd_recording_end: "",
     camera_count: "",
@@ -84,6 +85,7 @@ const DVRNVR = () => {
           hdd_recording_end: data.hdd_recording_end || "",
           hddstatus_id: data.hddstatus_id,
           hddrecording_mode: data.hddrecording_mode,
+          dvr_serialno: data.dvr_serialno,
           // Apply dropdown/comment logic for each specific field
           standalone: handleDropdownWithComment(data.standalone).dropdownValue,
           login_status: handleDropdownWithComment(data.login_status).dropdownValue,
@@ -199,6 +201,9 @@ const DVRNVR = () => {
     // Validate HDD recording start and end dates
     if (!formData.hdd_recording_start) {
       newErrors.hdd_recording_start = "HDD recording start date is required";
+    }
+    if (!formData.dvr_serialno) {
+      newErrors.dvr_serialno = "DVR serial Number is required";
     }
     if (!formData.hdd_recording_end) {
       newErrors.hdd_recording_end = "HDD recording end date is required";
@@ -437,6 +442,11 @@ const DVRNVR = () => {
         />
         {errors.hddrecording_mode && <p className="text-danger">{errors.hddrecording_mode}</p>}
       </div>
+      <div className="mb-3">
+              <label htmlFor="fstatus_id" className="form-label">DVR Serial Number:</label>
+              <input type="text" className="form-control" id="dvr_serialno" placeholder="Enter DVR Model" name="dvr_serialno" value={formData.dvr_serialno} onChange={handleChange} autoComplete="off"/>
+              {errors.dvr_serialno && <div className="text-danger">{errors.dvr_serialno}</div>}
+            </div>
 
       <div className="mb-3">
                 <label htmlFor="hdd_recording_start" className="form-label">
@@ -462,8 +472,16 @@ const DVRNVR = () => {
                   </small>
                 )}
               </div>
+              
 
-              <div className="mb-3">
+             
+              
+            </div>
+          </div>
+
+          <div className="col-lg-6">
+            <div className="border border-secondary p-3 rounded">
+            <div className="mb-3">
                 <label htmlFor="hdd_recording_end" className="form-label">
                   HDD Recording End:
                 </label>
@@ -487,12 +505,6 @@ const DVRNVR = () => {
                   </small>
                 )}
               </div>
-              
-            </div>
-          </div>
-
-          <div className="col-lg-6">
-            <div className="border border-secondary p-3 rounded">
             {[
               "standalone","login_status","dashboard_status","ntp_setting","sd_recording",
               ].map((field) => (

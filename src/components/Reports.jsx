@@ -15,6 +15,7 @@ const Reports = () => {
     const [apiData, setApiData] = useState([]);
     const [records, setRecords] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [email_id, setEmail_id] = useState("");
 
     const navigate = useNavigate();
     //function to handle new button click
@@ -34,9 +35,10 @@ const Reports = () => {
 
     // Fetch data from API
     useEffect(() => {
+        const email_id = sessionStorage.getItem("email_id")
         const fetchData = async () => {
             try {
-                const response = await fetch(`${url}getallppminfo`);
+                const response = await fetch(`${url}getemailppmdata?email_id=${email_id}`);
                 const result = await response.json();
                 const dataArray = Array.isArray(result) ? result : [result];
 
@@ -96,7 +98,7 @@ const Reports = () => {
         {
             name: "Action",
             cell: row => (
-                row.status && row.status.toUpperCase() !== "OK" ? (
+                (!row.status || row.status.toUpperCase() !== "OK") ? (
                     <button
                         className="btn btn-primary btn-sm"
                         onClick={() => handleEdit(row)}
@@ -109,6 +111,7 @@ const Reports = () => {
             allowOverflow: true,
             button: true,
         }
+        
     ];
 
     // Custom styles for DataTable

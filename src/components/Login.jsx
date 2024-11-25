@@ -21,6 +21,7 @@ const Login = ({ onLoginSuccess }) => {
       .then(data => {
         if (data.message === "Login successful") { // Match the message from backend
           onLoginSuccess(); // Call parent function to set login status
+          sessionStorage.setItem("email_id", username);
           navigate('/dashboard'); // Redirect to dashboard
         } else {
           alert(data.message); // Show error message if login fails
