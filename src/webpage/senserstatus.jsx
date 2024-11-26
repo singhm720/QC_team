@@ -6,6 +6,7 @@ import url from "../config";
 const SenserStatus = () => {
     const [formData, setFormData] = useState({
         ups_id: '',
+        emllock_id: '',
         ntwoway_id: '',
         stwoway_id: '',
         smokes_id: '',
@@ -66,6 +67,7 @@ const SenserStatus = () => {
     
                 setFormData({
                     ups_id: data.ups_id,
+                    emllock_id: data.emllock_id,
                     ntwoway_id: handleDropdownWithComment(data.ntwoway_id).dropdownValue,
                     stwoway_id: handleDropdownWithComment(data.stwoway_id).dropdownValue,
                     smokes_id: handleDropdownWithComment(data.smokes_id).dropdownValue,
@@ -99,7 +101,7 @@ const SenserStatus = () => {
         let validationErrors = {};
         let valid = true;
 
-        ["ups_id", "ntwoway_id", "stwoway_id", "smokes_id", "panic_id", "pir_id", "senser_id", "siren_status", "relays_id", "videocal_id"].forEach((field) => {
+        ["ups_id", "emllock_id", "ntwoway_id", "stwoway_id", "smokes_id", "panic_id", "pir_id", "senser_id", "siren_status", "relays_id", "videocal_id"].forEach((field) => {
             if (!formData[field]) {
                 validationErrors[field] = "This field is required";
                 valid = false;
@@ -204,7 +206,16 @@ const SenserStatus = () => {
                             <input type="text" className="form-control" id="ups_id" name="ups_id" value={formData.ups_id} onChange={handleChange} />
                             {errors.ups_id && <small className="text-danger">{errors.ups_id}</small>}
                         </div>
-
+                        <div className="mb-3">
+                        <label htmlFor="emllock_id" className="form-label">EML Lock:</label>
+                            <select className="form-select" id="emllock_id" name="emllock_id" onChange={handleChange} value={formData.emllock_id}>
+                                <option value="">Select</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                            {errors.emllock_id && <small className="text-danger">{errors.emllock_id}</small>}
+                        </div>
                         <div className="mb-3">
                             <label htmlFor="ntwoway_id" className="form-label">Normal Two Way Status:</label>
                             <select className="form-select" id="ntwoway_id" name="ntwoway_id" onChange={handleChange} value={formData.ntwoway_id}>
