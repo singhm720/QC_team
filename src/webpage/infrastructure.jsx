@@ -31,6 +31,7 @@ const Infrastructure = () => {
             setFormData({
               core_cable: data.core_cable,
               line_nutral: data.line_nutral,
+              line_earth: data.line_earth,
               earth_nutral: data.earth_nutral,
               panel_battery_voltage: data.panel_battery_voltage,
             });

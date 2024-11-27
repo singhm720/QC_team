@@ -3,6 +3,7 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import ResetPassword from './components/resetpassword'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
     <Router>
       <div className="flex">
         <Routes>
+          <Route path="/resetpassword" element={<ResetPassword />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           
           {/* Protected Routes for authenticated users */}
@@ -36,9 +38,6 @@ function App() {
               )
             }
           />
-
-          {/* Redirect to login by default */}
-          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>
     </Router>

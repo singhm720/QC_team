@@ -4,6 +4,7 @@ import url from "../config";
 import { useNavigate } from 'react-router-dom';
 import { BsCalendar2DateFill } from "react-icons/bs";
 import DatePicker from "react-datepicker";
+import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
 const FinalStatus = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +24,9 @@ const FinalStatus = () => {
   
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isClearable, setIsClearable] = useState(true);
+  const [isSearchable, setIsSearchable] = useState(true);
   const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
   const recordId = localStorage.getItem('recordId');
   
@@ -50,13 +54,11 @@ const FinalStatus = () => {
               fire_station_no: data.fire_station_no,
               faulty: data.faulty,
               action_taken: data.action_taken
-
             });
         } else {
             alert(`Error: ${data.error}`);
         }
     } catch (error) {
-        console.error('Fetch error:', error);
         alert('Error fetching data for edit:', error);
     }
   };
@@ -126,10 +128,29 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="status_id" className="form-label">Status:</label>
-              <input type="text" className="form-control" id="status_id" placeholder="Enter Status" name="status" value={formData.status} onChange={handleChange} autoComplete="off"/>
-              {errors.status && <div className="text-danger">{errors.status}</div>}
+              <label htmlFor="status_id" className="form-label">Status</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="status"
+                id="status_id"
+                value={[
+                  { value: 'Ok', label: 'Ok' },
+                  { value: 'Not OK', label: 'Not OK' },
+                ].find(option => option.value === formData.status)} // Preselect based on fetched data
+                onChange={(selectedOption) => handleChange({ target: { name: 'status', value: selectedOption?.value } })}
+                options={[
+                  { value: 'Ok', label: 'Ok' },
+                  { value: 'Not OK', label: 'Not OK' },
+                ]}
+                isClearable={true}
+                isSearchable={false}
+                required
+              />
+              {errors.status && <p className="text-danger">{errors.status}</p>}
             </div>
+
+
 
             <div className="mb-3">
               <label htmlFor="fstatus_id" className="form-label">Final Status:</label>

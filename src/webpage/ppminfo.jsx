@@ -28,7 +28,8 @@ const Ppminfo = () => {
         e_code: '',
         engineer_mobile: '',
         address_pincode: '',
-        atm_id: ''
+        atm_id: '',
+        email_id: sessionStorage.getItem('email_id') || '',
     });
 
     const [errors, setErrors] = useState({});

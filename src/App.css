@@ -22,13 +22,13 @@
 
   /* for login component */
   body{
-    background-color: aliceblue;
+    background-color: rgba(240, 243, 255, 0);
+    background-image: url('/public/loginbackg.webp');
   }
   .addUser {
-    background-color: white;
+    background-color: rgba(247, 242, 242, 0.281);
     width: 25%;
     margin: 50px auto;
-    /* margin in top and bottom will be 50px  */
     /* left and right auto  */
     padding: 40px;
     border-radius: 10px;
