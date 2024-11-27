@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../App.css";
 import url from "../config";
@@ -8,7 +8,20 @@ const Login = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [isForgetPassword, setIsForgetPassword] = useState(false); // Toggle between forms
   const [email, setEmail] = useState(''); // For forget password
+  const [isLoading, setIsLoading] = useState(false); // Buffer bar state
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false); // Disable button
+  const [countdown, setCountdown] = useState(0); // Countdown for 1 minute
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    } else if (countdown === 0) {
+      setIsButtonDisabled(false); // Enable button after countdown
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -36,6 +49,7 @@ const Login = ({ onLoginSuccess }) => {
 
   const handleForgetPasswordSubmit = (e) => {
     e.preventDefault();
+    setIsLoading(true); // Show buffer bar
     fetch(`${url}api/checkemail`, {
       method: 'POST',
       headers: {
@@ -45,15 +59,19 @@ const Login = ({ onLoginSuccess }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.success) {  // Check for success status
+        setIsLoading(false); // Hide buffer bar
+        if (data.success) { 
           alert('A password reset link has been sent to your email.');
+          setIsButtonDisabled(true); // Disable submit button
+          setCountdown(60); // Start 1-minute countdown
         } else if (data.error) {
-          alert(data.error);  // Display the error message if exists
+          alert(data.error);
         } else {
           alert('Something went wrong.');
         }
       })
       .catch((error) => {
+        setIsLoading(false); // Hide buffer bar on error
         alert('There was an error processing your request.');
       });
   };
@@ -120,9 +138,18 @@ const Login = ({ onLoginSuccess }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <button type="submit" className="btn btn-primary">
-                Submit
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isButtonDisabled || isLoading} // Disable button if loading or countdown
+              >
+                {isLoading ? "Processing..." : "Submit"}
               </button>
+              {countdown > 0 && (
+                <p style={{ color: "red" }}>
+                  Please wait {countdown} seconds before trying again.
+                </p>
+              )}
               <p
                 style={{
                   textAlign: "right",
