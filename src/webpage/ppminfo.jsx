@@ -8,13 +8,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Ppminfo = () => {
-    const today = new Date().toISOString().split('T')[0];
     const navigate = useNavigate();
     const location = useLocation(); // to get query params like mode and id
     const [isLoading, setIsLoading] = useState(false);
     const [isClearable, setIsClearable] = useState(true);
     const [isSearchable, setIsSearchable] = useState(true);
-    const [date, setDate] = useState(today);
+    const [date, setDate] = useState();
     
     const [formData, setFormData] = useState({
         panel_id: '',
@@ -272,13 +271,17 @@ const Ppminfo = () => {
             alert("Please fill in all required fields.");
             return;
         }
+        const updateddata = ({
+            ...formData,
+            checking_date: date
+        })
         try {
             const response = await fetch(`${url}create-entry`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, checking_date: date }),
+                body: JSON.stringify(updateddata),
             });
 
             const data = await response.json();
@@ -310,7 +313,7 @@ const Ppminfo = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, checking_date: date }),
+                body: JSON.stringify(formData),
             });
 
             const data = await response.json();
