@@ -214,8 +214,9 @@ const DVRNVR = () => {
   };
   
   const handleDateChange = (field, date) => {
-    setFormData((prev) => ({ ...prev, [field]: date }));
-  };
+    const formattedDate = date ? date.toISOString().split('T')[0] : ""; // Extract only 'YYYY-MM-DD'
+    setFormData((prev) => ({ ...prev, [field]: formattedDate }));
+};
 
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -365,8 +366,8 @@ const DVRNVR = () => {
             <option value="1TB">1TB</option>
             <option value="2TB">2TB</option>
             <option value="4TB">4TB</option>
-            <option value="4TB">6TB</option>
-            <option value="4TB">8TB</option>
+            <option value="6TB">6TB</option>
+            <option value="8TB">8TB</option>
           </select>
 
           {/* HDD Serial Number Input */}

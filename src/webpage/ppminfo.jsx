@@ -82,8 +82,10 @@ const Ppminfo = () => {
     }, [mode, recordId]);
 
     const handleDateChange = (field, date) => {
-        setFormData((prev) => ({ ...prev, [field]: date }));
+        const formattedDate = date ? date.toISOString().split('T')[0] : ""; // Extract only 'YYYY-MM-DD'
+        setFormData((prev) => ({ ...prev, [field]: formattedDate }));
     };
+    
 
     // Fetch data for editing
     const fetchDataForEdit = async (id) => {
@@ -271,17 +273,13 @@ const Ppminfo = () => {
             alert("Please fill in all required fields.");
             return;
         }
-        const updateddata = ({
-            ...formData,
-            checking_date: date
-        })
         try {
             const response = await fetch(`${url}create-entry`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updateddata),
+                body: JSON.stringify(formData),
             });
 
             const data = await response.json();
@@ -307,6 +305,7 @@ const Ppminfo = () => {
             alert("Please fill in all required fields.");
             return;
         }
+        console.log(JSON.stringify(formData))
         try {
             const response = await fetch(`${url}update-entry/${recordId}`, {
                 method: 'PUT',
@@ -407,7 +406,7 @@ const Ppminfo = () => {
                                     <DatePicker
                                     className="form-control"
                                     placeholderText="Select start date"
-                                    selected={formData.checking_date}
+                                    selected={ formData.checking_date ? new Date(formData.checking_date) : null}
                                     onChange={(date) => handleDateChange("checking_date", date)}
                                     dateFormat="dd/MM/yyyy"
                                     />
@@ -428,7 +427,7 @@ const Ppminfo = () => {
                                     <DatePicker
                                     className="form-control"
                                     placeholderText="Select date"
-                                    selected={formData.secv_id}
+                                    selected={ formData.secv_id ? new Date(formData.secv_id) : null}
                                     onChange={(date) => handleDateChange("secv_id", date)}
                                     dateFormat="dd/MM/yyyy"
                                     />

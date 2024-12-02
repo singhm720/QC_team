@@ -12,7 +12,7 @@ const FinalStatus = () => {
     status: '',
     final_status: '',
     assigned_to: '',
-    today: null,
+    today: '',
     rectify: '',
     month: '',
     quarterly_status: '',
@@ -71,8 +71,9 @@ const FinalStatus = () => {
     }));
   };
   const handleDateChange = (field, date) => {
-    setFormData((prev) => ({ ...prev, [field]: date }));
-  };
+    const formattedDate = date ? date.toISOString().split('T')[0] : ""; // Extract only 'YYYY-MM-DD'
+    setFormData((prev) => ({ ...prev, [field]: formattedDate }));
+};
   const validateForm = () => {
     const newErrors = {};
     if (!formData.remark) newErrors.remark = 'Remark is required';
@@ -89,7 +90,6 @@ const FinalStatus = () => {
     if (!formData.action_taken) newErrors.action_taken = 'Action Taken is required';
 
     setErrors(newErrors);
-    console.log(JSON.stringify(formData));
     return Object.keys(newErrors).length === 0;
   };
 
@@ -175,7 +175,8 @@ const FinalStatus = () => {
                 <DatePicker
                   className="form-control"
                   placeholderText="Select Date"
-                  selected={formData.today}
+                  selected={formData.today ? new Date(formData.today) : null}
+                  // selected={formData.today}
                   onChange={(date) => handleDateChange("today", date)}
                   dateFormat="dd/MM/yyyy"
                 />

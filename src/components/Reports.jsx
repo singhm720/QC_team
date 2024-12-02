@@ -105,7 +105,13 @@ const Reports = () => {
                     >
                         Edit
                     </button>
-                ) : null
+                ) : (
+                    <button
+                        className="btn btn-primary btn-sm"
+                    >
+                        Completed
+                    </button>
+                )
             ),
             ignoreRowClick: true,
             allowOverflow: true,
