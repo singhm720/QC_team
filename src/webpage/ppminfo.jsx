@@ -82,9 +82,44 @@ const Ppminfo = () => {
     }, [mode, recordId]);
 
     const handleDateChange = (field, date) => {
-        const formattedDate = date ? date.toISOString().split('T')[0] : ""; // Extract only 'YYYY-MM-DD'
-        setFormData((prev) => ({ ...prev, [field]: formattedDate }));
+        if (!date) {
+            setFormData((prev) => ({ ...prev, [field]: "" }));
+            return;
+        }
+    
+        // Ensure date is correctly formatted in local timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+        const day = String(date.getDate()).padStart(2, "0");
+        const formattedDate = `${year}-${month}-${day}`; // Format as 'YYYY-MM-DD'
+    
+        setFormData((prev) => {
+            const updatedFormData = { ...prev, [field]: formattedDate };
+    
+            // Validation for "Second Visit" date
+            if (field === "secv_id" && updatedFormData.checking_date) {
+                const checkingDate = new Date(updatedFormData.checking_date);
+                const secondVisitDate = new Date(formattedDate);
+    
+                if (secondVisitDate < checkingDate) {
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        secv_id: "Second Visit date cannot be earlier than Checking Date.",
+                    }));
+                    return prev; // Don't update the state if validation fails
+                } else {
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        secv_id: null, // Clear error if validation passes
+                    }));
+                }
+            }
+    
+            return updatedFormData;
+        });
     };
+    
+    
     
 
     // Fetch data for editing
@@ -203,7 +238,7 @@ const Ppminfo = () => {
         if (!formData.engineer_mobile) newErrors.engineer_mobile = "Engineer mobile is required.";
         if (!formData.address_pincode) newErrors.address_pincode = "Address pincode is required.";
         if (!formData.atm_id) newErrors.atm_id = "ATM ID is required.";
-        if (!formData.secv_id) newErrors.secv_id = "Second Visit is required.";
+        // if (!formData.secv_id) newErrors.secv_id = "Second Visit is required.";
         if (!formData.qcass_id) newErrors.qcass_id = "QC name is required.";
         if (!formData.am_name) newErrors.am_name = "Area Manager name is required.";
 
@@ -279,7 +314,7 @@ const Ppminfo = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({...formData, secv_id: formData.secv_id ? formData.secv_id : null,}),
             });
 
             const data = await response.json();
@@ -312,7 +347,7 @@ const Ppminfo = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({...formData, secv_id: formData.secv_id ? formData.secv_id : null,}),
             });
 
             const data = await response.json();

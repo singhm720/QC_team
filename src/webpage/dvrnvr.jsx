@@ -214,9 +214,20 @@ const DVRNVR = () => {
   };
   
   const handleDateChange = (field, date) => {
-    const formattedDate = date ? date.toISOString().split('T')[0] : ""; // Extract only 'YYYY-MM-DD'
+    if (!date) {
+        setFormData((prev) => ({ ...prev, [field]: "" }));
+        return;
+    }
+
+    // Format date in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`; // Format as 'YYYY-MM-DD'
+
     setFormData((prev) => ({ ...prev, [field]: formattedDate }));
 };
+
 
   const handleSubmit = async () => {
     if (!validateForm()) {
