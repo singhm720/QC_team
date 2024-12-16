@@ -35,28 +35,40 @@ const Reports = () => {
 
     // Fetch data from API
     useEffect(() => {
-        const email_id = sessionStorage.getItem("email_id")
+        const email_id = sessionStorage.getItem("email_id"); // Get the logged-in user's email
+    
         const fetchData = async () => {
             try {
-                const response = await fetch(`${url}getemailppmdata?email_id=${email_id}`);
+                const response = await fetch(`${url}getallppminfo`); // Fetch all data
                 const result = await response.json();
                 const dataArray = Array.isArray(result) ? result : [result];
-
-                 // Sort data: non-"Ok" status first
-                 const sortedData = dataArray.sort((a, b) => {
-                    
+    
+                // Filter logic:
+                const filteredData = dataArray.filter(item => {
+                    // Show "Not Ok" data to everyone
+                    if (item.status === "Not Ok") return true;
+                    // Show "Ok" data only to the logged-in user
+                    if (item.status === "OK" && item.email_id === email_id) return true;
+                    return false;
+                });
+    
+                // Sort data: "Not Ok" first
+                const sortedData = filteredData.sort((a, b) => {
                     if (a.status !== "OK" && b.status === "OK") return -1;
                     if (a.status === "OK" && b.status !== "OK") return 1;
                     return 0;
                 });
-                setApiData(sortedData);
-                setRecords(sortedData); // Initially display all records
+    
+                setApiData(sortedData); // Set the filtered and sorted data
+                setRecords(sortedData); // Set the displayed records
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
+    
         fetchData();
-    }, []);
+    }, [url]);
+    
      // Columns for DataTable
      const columns = [
         {
@@ -108,8 +120,9 @@ const Reports = () => {
                 ) : (
                     <button
                         className="btn btn-primary btn-sm"
+                        onClick={() => handleEdit(row)}
                     >
-                        Completed
+                        Edit
                     </button>
                 )
             ),
@@ -143,7 +156,7 @@ const Reports = () => {
         const end = endDate.toISOString().split('T')[0]; // Format date
 
         try {
-            const response = await fetch(`${url}api/download-report?start_date=${start}&end_date=${end}`, {
+            const response = await fetch(`${url}download-report?start_date=${start}&end_date=${end}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

@@ -39,12 +39,13 @@ const Ppminfo = () => {
 
     const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
     const recordId = localStorage.getItem('recordId');
+    // const [isQcassIdDisabled, setQcassIdDisabled] = useState(false);
 
     // Fetch client names
     useEffect(() => {
         const fetchClientNames = async () => {
             try {
-                const response = await fetch(`${url}api/client_name`);
+                const response = await fetch(`${url}client_name`);
                 const data = await response.json();
                 if (response.ok) {
                     setClientNames(data.client_names.map(name => ({ value: name, label: name })));
@@ -58,7 +59,7 @@ const Ppminfo = () => {
 
         const getAreaManager = async () => {
             try {
-                const response = await fetch(`${url}api/get_area_manager`);
+                const response = await fetch(`${url}get_area_manager`);
                 const data = await response.json();
                 if (response.ok) {
                     setsetamvals(data["Area Manager"].map(name => ({ value: name, label: name })));
@@ -72,7 +73,16 @@ const Ppminfo = () => {
                 setIsLoading(false);
             }
         };
-
+        const name = sessionStorage.getItem('name')
+         // If the 'name' is present, set it in the form data
+        if (name) {
+            setFormData(prevState => ({
+            ...prevState,
+            qcass_id: name
+            }));
+            // Disable the qcass_id field if name is set successfully
+            // setQcassIdDisabled(true);
+        }
         fetchClientNames();
         getAreaManager();
 
@@ -118,9 +128,6 @@ const Ppminfo = () => {
             return updatedFormData;
         });
     };
-    
-    
-    
 
     // Fetch data for editing
     const fetchDataForEdit = async (id) => {
@@ -128,6 +135,7 @@ const Ppminfo = () => {
             const response = await fetch(`${url}getbyidppminfo/${id}`);
             const data = await response.json();
             if (response.ok) {
+                
                 // Update the formData state with the fetched data
                 setFormData({
                     panel_id: data.panel_id,
@@ -143,6 +151,12 @@ const Ppminfo = () => {
                     address_pincode: data.address_pincode,
                     atm_id: data.atm_id
                 });
+                // Disable the qcass_id field if it exists
+                if (data.qcass_id) {
+                    setQcassIdDisabled(true); // Disable the input field
+                } else {
+                    setQcassIdDisabled(false); // Ensure it's enabled if qcass_id is not found
+                }
                 // Additional logic for fetching panel IDs and area manager if needed
                 fetchPanelIDs(data.client_id);
                 setsetamvals(prevOptions => {
@@ -164,7 +178,7 @@ const Ppminfo = () => {
     const fetchPanelIDs = async (clientName) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${url}api/get_panel_id/${clientName}`);
+            const response = await fetch(`${url}get_panel_id/${clientName}`);
             const data = await response.json();
             if (response.ok) {
                 setPanelIDs(data.panel_ids.map(id => ({ value: id, label: id })));
@@ -272,7 +286,7 @@ const Ppminfo = () => {
     // Get area manager eng_name eng_emp
     const getmapping = async (panel_id, client_id) => {
         try {
-            const response = await fetch(`${url}api/mappings?Panel_Type=${panel_id}`);
+            const response = await fetch(`${url}mappings?Panel_Type=${panel_id}`);
             const data = await response.json();
             
             if (response.ok && data.length > 0) { 
@@ -482,6 +496,7 @@ const Ppminfo = () => {
                                     placeholder="Enter QC Name"
                                     name="qcass_id"
                                     value={formData.qcass_id}
+                                    // disabled={isQcassIdDisabled} // Disable input field based on state
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />

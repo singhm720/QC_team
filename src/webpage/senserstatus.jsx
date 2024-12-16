@@ -166,7 +166,7 @@ const SenserStatus = () => {
                 relays_id: formData.relays_id === "No" ? comments.relayComment : formData.relays_id,
                 videocal_id: formData.videocal_id === "No" ? comments.videoCallComment : formData.videocal_id,
             };
-            const response = await fetch(`${url}/update-sensors/${recordId}`, {
+            const response = await fetch(`${url}update-sensors/${recordId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

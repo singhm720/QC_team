@@ -29,7 +29,7 @@ const ResetPassword = () => {
       setErrorMessage("Passwords do not match.");
       return;
     }
-    fetch(`${url}api/resetpassword`, {
+    fetch(`${url}resetpassword`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

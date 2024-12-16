@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { FaHome, FaBroadcastTower, FaDigitalTachograph, FaCashRegister, FaBuilding, FaRegHandshake, FaDeezer } from 'react-icons/fa';
+import { FaHome, FaBroadcastTower, FaDigitalTachograph, FaCashRegister, FaBuilding, FaRegHandshake, FaDeezer, FaUserPlus, FaTasks, FaDatabase } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ sidebarToggle }) => {
   const [recordId, setRecordId] = useState(localStorage.getItem('recordId'));
-  const [isPPMInfoSaved, setIsPPMInfoSaved] = useState(localStorage.getItem('ppmInfoSaved') === 'true'); // Check if PPM info is saved
+  const [isPPMInfoSaved, setIsPPMInfoSaved] = useState(localStorage.getItem('ppmInfoSaved') === 'true');
+  const [userType, setUserType] = useState(sessionStorage.getItem('user_type')); // Fetch user type
   const location = useLocation();
   const navigate = useNavigate();
-  // Check if "mode=edit" is in the URL query parameters
+
   const isEditMode = new URLSearchParams(location.search).get('mode') === 'edit';
 
-  // const getLinkWithMode = (path) => {
-  //   const link = recordId ? `${path}?mode=edit` : path;
-  //   return link;
-  // };
-  // Dynamically set URL with "mode=edit" if conditions are met
   const handleNavigation = (path) => {
     if (recordId && isPPMInfoSaved) {
       navigate(`${path}?mode=edit`);
@@ -24,27 +20,36 @@ const Sidebar = ({ sidebarToggle }) => {
   };
 
   useEffect(() => {
-      const handleStorageChange = () => {
-        setRecordId(localStorage.getItem('recordId'));
-        setIsPPMInfoSaved(localStorage.getItem('ppmInfoSaved') === 'true');
-      };
-      handleStorageChange();
-      window.addEventListener('storage', handleStorageChange());
-      return () => {
-        window.removeEventListener('storage', handleStorageChange());
-      }
-    return () => clearInterval(intervalId);
+    const handleStorageChange = () => {
+      setRecordId(localStorage.getItem('recordId'));
+      setIsPPMInfoSaved(localStorage.getItem('ppmInfoSaved') === 'true');
+      setUserType(sessionStorage.getItem('user_type')); // Update user type
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [location]);
 
-  const menuItems = [
+  const generalMenuItems = [
     { path: "/dashboard", label: "Dashboard", icon: <FaDeezer className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
     { path: "/dashboard/ppminfo", label: "PPM Info", icon: <FaHome className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
-    { path: "/dashboard/dvrnvr", label: "DVR/NVR", icon: <FaDigitalTachograph className="inline-block w-6 h-6 mr-2 -mt-2" />},
-    { path: "/dashboard/senserstatus", label: "Sensor Status", icon: <FaCashRegister className="inline-block w-6 h-6 mr-2 -mt-2" />, },
-    { path: "/dashboard/routerinfo", label: "Router Info", icon: <FaBroadcastTower className="inline-block w-6 h-6 mr-2 -mt-2" />, },
-    { path: "/dashboard/infrastructure", label: "Infrastructure", icon: <FaBuilding className="inline-block w-6 h-6 mr-2 -mt-2" />, },
-    { path: "/dashboard/finalstatus", label: "Final Status", icon: <FaRegHandshake className="inline-block w-6 h-6 mr-2 -mt-2" />, },
+    { path: "/dashboard/dvrnvr", label: "DVR/NVR", icon: <FaDigitalTachograph className="inline-block w-6 h-6 mr-2 -mt-2" /> },
+    { path: "/dashboard/senserstatus", label: "Sensor Status", icon: <FaCashRegister className="inline-block w-6 h-6 mr-2 -mt-2" /> },
+    { path: "/dashboard/routerinfo", label: "Router Info", icon: <FaBroadcastTower className="inline-block w-6 h-6 mr-2 -mt-2" /> },
+    { path: "/dashboard/infrastructure", label: "Infrastructure", icon: <FaBuilding className="inline-block w-6 h-6 mr-2 -mt-2" /> },
+    { path: "/dashboard/finalstatus", label: "Final Status", icon: <FaRegHandshake className="inline-block w-6 h-6 mr-2 -mt-2" /> },
   ];
+
+  const adminMenuItems = [
+    { path: "/dashboard/admin", label: "Dashboard", icon: <FaDeezer className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
+    { path: "/dashboard/User_admin", label: "Users", icon: <FaUserPlus className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
+    { path: "/dashboard/Mapping_admin", label: "Mapping", icon: <FaTasks className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
+    { path: "/dashboard/Master_Admin", label: "Master Data", icon: <FaDatabase className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
+    { path: "/dashboard/PMData_admin", label: "PM Data", icon: <FaDatabase className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },
+  ];
+
+  const menuItems = userType === 'Admin' ? adminMenuItems : generalMenuItems;
 
   return (
     <div className={`${sidebarToggle ? 'hidden' : 'block'} w-64 bg-gray-800 fixed h-full px-4 py-2`}>

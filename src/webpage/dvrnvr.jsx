@@ -379,6 +379,7 @@ const DVRNVR = () => {
             <option value="4TB">4TB</option>
             <option value="6TB">6TB</option>
             <option value="8TB">8TB</option>
+            <option value="16TB">16TB</option>
           </select>
 
           {/* HDD Serial Number Input */}

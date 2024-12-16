@@ -31,12 +31,21 @@ const FinalStatus = () => {
   const recordId = localStorage.getItem('recordId');
   
   useEffect(() => {
+    const name = sessionStorage.getItem('name')
+         // If the 'name' is present, set it in the form data
+        if (name) {
+            setFormData(prevState => ({
+            ...prevState,
+            assigned_to: name
+            }));
+        }
     if (mode === "edit" && recordId) {
-      fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
-  }
+      fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit'
+      
+    }
   }, [mode, recordId]);
 
-  const fetchDataForEdit = async (id) => {
+  const fetchDataForEdit = async (id, name) => {
     try {
         const response = await fetch(`${url}getbyidppminfo/${id}`);
         const data = await response.json();
@@ -45,7 +54,7 @@ const FinalStatus = () => {
               remark: data.remark,
               status: data.status,
               final_status: data.final_status,
-              assigned_to: data.assigned_to,
+              assigned_to: name,
               today: data.today,
               rectify: data.rectify,
               month: data.month,
@@ -55,6 +64,7 @@ const FinalStatus = () => {
               faulty: data.faulty,
               action_taken: data.action_taken
             });
+
         } else {
             alert(`Error: ${data.error}`);
         }
@@ -63,6 +73,7 @@ const FinalStatus = () => {
     }
   };
 
+  console.log(JSON.stringify(formData));
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -105,7 +116,6 @@ const FinalStatus = () => {
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    console.log(JSON.stringify(formData));
     try {
       const response = await fetch(`${url}update-final-status/${recordId}`, {
         method: 'PUT',
@@ -169,8 +179,8 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="assignto_id" className="form-label">Assigned To:</label>
-              <input type="text" className="form-control" id="assignto_id" placeholder="Enter Assigned To" name="assigned_to" value={formData.assigned_to} onChange={handleChange} autoComplete="off"/>
+              <label htmlFor="assigned_to" className="form-label">Assigned To:</label>
+              <input type="text" className="form-control" id="assigned_to" placeholder="Enter Assigned To" name="assigned_to" value={formData.assigned_to} onChange={handleChange} autoComplete="off"/>
               {errors.assigned_to && <div className="text-danger">{errors.assigned_to}</div>}
             </div>
 
