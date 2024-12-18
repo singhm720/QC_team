@@ -149,10 +149,8 @@ const Reports = () => {
             alert('Please select both start and end dates.');
             return;
         }
-
         const start = startDate.toISOString().split('T')[0]; // Format date
         const end = endDate.toISOString().split('T')[0]; // Format date
-
         try {
             const response = await fetch(`${url}download-report?start_date=${start}&end_date=${end}`, {
                 method: 'GET',

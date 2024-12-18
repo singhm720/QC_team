@@ -150,7 +150,7 @@ const RouterInfo = () => {
   };
 
   const submitData = async (redirect = false) => {
-
+    alert("data send");
     try {
       const formToSubmit = { ...formData };
       if (formToSubmit.router_sim === '1') delete formToSubmit.sim_number2;
