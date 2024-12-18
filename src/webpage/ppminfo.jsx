@@ -131,6 +131,7 @@ const Ppminfo = () => {
 
     // Fetch data for editing
     const fetchDataForEdit = async (id) => {
+        debugger;
         try {
             const response = await fetch(`${url}getbyidppminfo/${id}`);
             const data = await response.json();
@@ -151,12 +152,6 @@ const Ppminfo = () => {
                     address_pincode: data.address_pincode,
                     atm_id: data.atm_id
                 });
-                // Disable the qcass_id field if it exists
-                if (data.qcass_id) {
-                    setQcassIdDisabled(true); // Disable the input field
-                } else {
-                    setQcassIdDisabled(false); // Ensure it's enabled if qcass_id is not found
-                }
                 // Additional logic for fetching panel IDs and area manager if needed
                 fetchPanelIDs(data.client_id);
                 setsetamvals(prevOptions => {

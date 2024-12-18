@@ -25,11 +25,13 @@ const Sidebar = ({ sidebarToggle }) => {
       setIsPPMInfoSaved(localStorage.getItem('ppmInfoSaved') === 'true');
       setUserType(sessionStorage.getItem('user_type')); // Update user type
     };
+    handleStorageChange();
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [location]);
+  },
+  [location]);
 
   const generalMenuItems = [
     { path: "/dashboard", label: "Dashboard", icon: <FaDeezer className="inline-block w-6 h-6 mr-2 -mt-2" />, alwaysEnabled: true },

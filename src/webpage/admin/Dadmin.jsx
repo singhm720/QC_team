@@ -3,7 +3,7 @@ import { BsCalendar2DateFill, BsFileEarmarkExcelFill } from "react-icons/bs";
 import { useNavigate } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import DataTable from 'react-data-table-component';
-import '../../components/Reports.css';
+import SetLoading from '../setloading';
 import url from '../../config';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
@@ -48,7 +48,7 @@ const DAdmin = () => {
                 setApiData(sortedData);
                 setRecords(sortedData); // Initially display all records
             } catch (error) {
-                console.error('Error fetching data:', error);
+                alert('Error fetching data:', error);
             } finally {
                 setIsLoading(false); // End loading
             }
@@ -178,10 +178,7 @@ const DAdmin = () => {
     return (
         <div>
             {isLoading ? ( // Show loader when loading
-                <div className="loader-container">
-                    <div className="spinner"></div>
-                    <p>Loading data...</p>
-                </div>
+                <SetLoading />
             ) : (
                 <>
                     <div className="row align-items-center mb-3">

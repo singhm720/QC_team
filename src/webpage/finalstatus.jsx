@@ -31,14 +31,57 @@ const FinalStatus = () => {
   const recordId = localStorage.getItem('recordId');
   
   useEffect(() => {
-    const name = sessionStorage.getItem('name')
-         // If the 'name' is present, set it in the form data
-        if (name) {
-            setFormData(prevState => ({
-            ...prevState,
-            assigned_to: name
-            }));
-        }
+        const name = sessionStorage.getItem('name')
+        const currentDate = new Date();
+        const options = { month: 'short', year: '2-digit' };
+        const formattedMonthYear = currentDate.toLocaleDateString('en-US', options).replace(" ", "-");
+        setFormData(prevData => ({
+          ...prevData,
+          month: formattedMonthYear // Set default month value
+      }));
+
+      // If the 'name' is present, set it in the form data
+      if (name) {
+        setFormData(prevState => ({
+        ...prevState,
+        assigned_to: name
+        }));
+        // Fetch data from the API
+        const fetchData = async () => {
+          try {
+              const response = await fetch(`${url}getbyidppminfo/${recordId}`);
+              const data = await response.json();
+              // Fields to check
+              const fieldsToCheck = [
+                  'ntwoway_id',
+                  'stwoway_id',
+                  'smokes_id',
+                  'panic_id',
+                  'pir_id',
+                  'senser_id',
+                  'siren_status',
+                  'relays_id',
+                  'videocal_id',
+              ];
+
+              // Check for values other than 'Yes' or 'N/A'
+              const faultyIssues = fieldsToCheck
+                  .filter((field) => data[field] && data[field] !== 'Yes' && data[field] !== 'N/A')
+                  .map((field) => `${data[field]}`); // Add field name and its value
+
+              // Update the faulty field
+              setFormData((prevData) => ({
+                  ...prevData,
+                  remark: faultyIssues.join(', '), // Concatenate issues into a single string
+              }));
+          } catch (error) {
+              console.error('Error fetching data:', error);
+          }
+      };
+
+      fetchData();
+
+    }  
     if (mode === "edit" && recordId) {
       fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit'
       
@@ -72,8 +115,7 @@ const FinalStatus = () => {
         alert('Error fetching data for edit:', error);
     }
   };
-
-  console.log(JSON.stringify(formData));
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -207,21 +249,55 @@ const FinalStatus = () => {
             </div>
 
 
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label htmlFor="rectify_id" className="form-label">Rectify:</label>
               <input type="text" className="form-control" id="rectify_id" placeholder="Enter Rectify" name="rectify" value={formData.rectify} onChange={handleChange} autoComplete="off"/>
               {errors.rectify && <div className="text-danger">{errors.rectify}</div>}
+            </div> */}
+
+            <div className="mb-3">
+              <label htmlFor="rectify_id" className="form-label">Rectify:</label>
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="rectify"
+                id="rectify_id"
+                value={[
+                  { value: 'New', label: 'New' },
+                  { value: 'Rectify', label: 'Rectify' },
+                ].find(option => option.value === formData.rectify)} // Preselect based on fetched data
+                onChange={(selectedOption) => handleChange({ target: { name: 'rectify', value: selectedOption?.value } })}
+                options={[
+                  { value: 'New', label: 'New' },
+                  { value: 'Rectify', label: 'Rectify' },
+                ]}
+                isClearable={true}
+                isSearchable={false}
+                required
+              />
+              {errors.status && <p className="text-danger">{errors.status}</p>}
             </div>
+
+
           </div>
         </div>
 
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
-            <div className="mb-3">
-              <label htmlFor="month_id" className="form-label">Month:</label>
-              <input type="text" className="form-control" id="month_id" placeholder="Enter Month" name="month" value={formData.month} onChange={handleChange} autoComplete="off"/>
-              {errors.month && <div className="text-danger">{errors.month}</div>}
-            </div>
+          <div className="mb-3">
+            <label htmlFor="month_id" className="form-label">Month:</label>
+            <input
+                type="text"
+                className="form-control"
+                id="month_id"
+                placeholder="Enter Month"
+                name="month"
+                value={formData.month}
+                onChange={handleChange}
+                autoComplete="off"
+            />
+            {errors.month && <div className="text-danger">{errors.month}</div>}
+        </div>
 
             <div className="mb-3">
               <label htmlFor="quartly_id" className="form-label">Quarterly Status:</label>
@@ -242,10 +318,19 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="faulty_id" className="form-label">Faulty:</label>
-              <input type="text" className="form-control" id="faulty_id" placeholder="Enter Faulty" name="faulty" value={formData.faulty} onChange={handleChange} autoComplete="off"/>
-              {errors.faulty && <div className="text-danger">{errors.faulty}</div>}
-            </div>
+            <label htmlFor="faulty_id" className="form-label">Faulty:</label>
+            <input
+                type="text"
+                className="form-control"
+                id="faulty_id"
+                placeholder="Enter Faulty"
+                name="faulty"
+                value={formData.faulty}
+                onChange={handleChange}
+                autoComplete="off"
+            />
+            {errors.faulty && <div className="text-danger">{errors.faulty}</div>}
+        </div>
 
             <div className="mb-3">
               <label htmlFor="actiontk_id" className="form-label">Action Taken:</label>

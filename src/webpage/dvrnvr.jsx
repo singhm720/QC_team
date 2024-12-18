@@ -330,7 +330,7 @@ const DVRNVR = () => {
                       }
                     >
                       <option value="">Camera Count...</option>
-                      {[...Array(16).keys()].map((i) => (
+                      {[...Array(32).keys()].map((i) => (
                         <option key={i + 1} value={i + 1}>
                           {i + 1}
                         </option>
@@ -484,13 +484,9 @@ const DVRNVR = () => {
                     {errors.hdd_recording_start}
                   </small>
                 )}
-              </div>
-              
-
-             
-              
-            </div>
-          </div>
+      </div>
+      </div>
+    </div>
 
           <div className="col-lg-6">
             <div className="border border-secondary p-3 rounded">

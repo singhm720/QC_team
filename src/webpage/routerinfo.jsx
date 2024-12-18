@@ -22,6 +22,7 @@ const RouterInfo = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isClearable, setIsClearable] = useState(true);
     const [isSearchable, setIsSearchable] = useState(true);
+    const [isReasonInputVisible, setIsReasonInputVisible] = useState(false);
 
   const navigate = useNavigate();
   const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
@@ -35,10 +36,31 @@ const RouterInfo = () => {
       ...(name === "router_sim" && value === "1" && { sim_number2: '' }) // Clear sim_number2 if router_sim is 1
     }));
   };
+  const handleSelectChange = (selectedOption) => {
+    const value = selectedOption?.value || '';
+    setFormData((prev) => ({
+      ...prev,
+      ping_break_after_reset: value, // Update with just the selected value for now
+    }));
 
+    // Show the reason input only when a valid option is selected
+    setIsReasonInputVisible(value === 'Network Break No');
+  };
+  const handleReasonChange = (e) => {
+    const reason = e.target.value;
+    const currentSelection = formData.ping_break_after_reset ? formData.ping_break_after_reset.split('|')[0] : '';
+ // Extract only the selected value
+
+    // Update `ping_break_after_reset` to include the selected value and the reason
+    setFormData((prev) => ({
+      ...prev,
+      ping_break_after_reset: `${currentSelection}|${reason}`,
+    }));
+  };
   const antennaOptions = [
     { value: 'Lobby', label: 'Lobby' },
     { value: 'Backroom', label: 'Backroom' },
+    { value: 'Outside', label: 'Outside' },
   ];
   const antennaTypeOptions = [
     { value: 'Yagi', label: 'Yagi' },
@@ -52,11 +74,17 @@ const RouterInfo = () => {
   const routerOptions = [
     { value: '20 & 24', label: '20 & 24' },
     { value: 'R+R-', label: 'R+R-' },
+    { value: '12V', label: '12V' },
+    { value: 'Broadband', label: 'Broadband' },
   ];
   const routerSimOptions = [
     { value: '1', label: '1' },
     { value: '2', label: '2' },
   ];
+  const cablingoption = [
+    {value : 'Yes', label: 'Yes'},
+    {value : 'No', label :'No' },
+  ]
 
   useEffect(() => {
     const storedData = sessionStorage.getItem("Fetch Data:");
@@ -177,23 +205,48 @@ const RouterInfo = () => {
             {errors.router_id && <div className="text-danger">{errors.router_id}</div>}
           </div>
 
-            <div className="mb-3">
-              <label htmlFor="ping_break_after_reset" className="form-label">Ping Break After Reset:</label>
-              <Select
-                className="basic-single"
-                id="ping_break_after_reset"
-                name="ping_break_after_reset"
-                value={pingBreakOptions.find(option => option.value === formData.ping_break_after_reset)}
-                onChange={(selectedOption) =>
-                  handleChange({ target: { name: 'ping_break_after_reset', value: selectedOption?.value } })
-                }
-                options={pingBreakOptions}
-                isClearable={true} // Allow clearing the selection
-                isSearchable={true} // Allow searching within options
-                placeholder="Select Ping Break After Reset.."
-              />
-              {errors.ping_break_after_reset && <div className="text-danger">{errors.ping_break_after_reset}</div>}
-            </div>
+          <div className="mb-3">
+      <label htmlFor="ping_break_after_reset" className="form-label">
+        Ping Break After Reset:
+      </label>
+      <Select
+        className="basic-single"
+        id="ping_break_after_reset"
+        name="ping_break_after_reset"
+        value={pingBreakOptions.find(
+          (option) => option.value === formData.ping_break_after_reset ? formData.ping_break_after_reset.split('|')[0] : ''// Match only the selected value
+        )}
+        onChange={handleSelectChange}
+        options={pingBreakOptions}
+        isClearable={true}
+        isSearchable={true}
+        placeholder="Select Ping Break After Reset.."
+      />
+      {errors.ping_break_after_reset && (
+        <div className="text-danger">{errors.ping_break_after_reset}</div>
+      )}
+
+      {/* Conditionally render the reason input field */}
+      {isReasonInputVisible && (
+        <div className="mt-3">
+          <label htmlFor="ping_break_reason" className="form-label">
+            Reason for Ping Break:
+          </label>
+          <input
+            type="text"
+            id="ping_break_reason"
+            name="ping_break_reason"
+            value={formData.ping_break_after_reset.split('|')[1] || ''} // Extract reason if available
+            onChange={handleReasonChange}
+            className="form-control"
+            placeholder="Enter the reason..."
+          />
+          {errors.ping_break_reason && (
+            <div className="text-danger">{errors.ping_break_reason}</div>
+          )}
+        </div>
+      )}
+    </div>
 
             <div className="mb-3">
               <label htmlFor="router_signal" className="form-label">Router Signal:</label>
@@ -271,7 +324,7 @@ const RouterInfo = () => {
 
 
             {/* Cabling */}
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label htmlFor="cabling" className="form-label">Cabling:</label>
               <input
                 type="text"
@@ -284,7 +337,27 @@ const RouterInfo = () => {
                 autoComplete="off"
               />
               {errors.cabling && <div className="text-danger">{errors.cabling}</div>}
+            </div> */}
+            
+            <div className="mb-3">
+              <label htmlFor="cabling" className="form-label">Cabling:</label>
+              <Select
+                className="basic-single"
+                id="cabling"
+                name="cabling"
+                value={cablingoption.find(option => option.value === formData.cablingoption)}
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'cablingoption', value: selectedOption?.value } })
+                }
+                options={cablingoption}
+                isClearable={isClearable}
+                isSearchable={isSearchable}
+                placeholder="Select cabling..."
+              />
+              {errors.cablingoption && <div className="text-danger">{errors.cablingoption}</div>}
             </div>
+
+
 
           <div className="mb-3">
               <label htmlFor="router_serial_number" className="form-label">Router Serial Number:</label>
