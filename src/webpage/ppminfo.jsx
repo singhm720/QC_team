@@ -8,19 +8,18 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 const Ppminfo = () => {
-    const today = new Date().toISOString().split('T')[0];
     const navigate = useNavigate();
     const location = useLocation(); // to get query params like mode and id
     const [isLoading, setIsLoading] = useState(false);
     const [isClearable, setIsClearable] = useState(true);
     const [isSearchable, setIsSearchable] = useState(true);
-    const [date, setDate] = useState(today);
+    const [date, setDate] = useState();
     
     const [formData, setFormData] = useState({
         panel_id: '',
         client_id: '',
         merg_id: '',
-        checking_date: '',
+        checking_date: '' || new Date().toISOString().split("T")[0],
         secv_id: '',
         qcass_id: '',
         am_name: '',
@@ -40,12 +39,13 @@ const Ppminfo = () => {
 
     const mode = new URLSearchParams(location.search).get('mode'); // check mode (new or edit)
     const recordId = localStorage.getItem('recordId');
+    // const [isQcassIdDisabled, setQcassIdDisabled] = useState(false);
 
     // Fetch client names
     useEffect(() => {
         const fetchClientNames = async () => {
             try {
-                const response = await fetch(`${url}api/client_name`);
+                const response = await fetch(`${url}client_name`);
                 const data = await response.json();
                 if (response.ok) {
                     setClientNames(data.client_names.map(name => ({ value: name, label: name })));
@@ -59,7 +59,7 @@ const Ppminfo = () => {
 
         const getAreaManager = async () => {
             try {
-                const response = await fetch(`${url}api/get_area_manager`);
+                const response = await fetch(`${url}get_area_manager`);
                 const data = await response.json();
                 if (response.ok) {
                     setsetamvals(data["Area Manager"].map(name => ({ value: name, label: name })));
@@ -73,7 +73,16 @@ const Ppminfo = () => {
                 setIsLoading(false);
             }
         };
-
+        const name = sessionStorage.getItem('name')
+         // If the 'name' is present, set it in the form data
+        if (name) {
+            setFormData(prevState => ({
+            ...prevState,
+            qcass_id: name
+            }));
+            // Disable the qcass_id field if name is set successfully
+            // setQcassIdDisabled(true);
+        }
         fetchClientNames();
         getAreaManager();
 
@@ -83,7 +92,40 @@ const Ppminfo = () => {
     }, [mode, recordId]);
 
     const handleDateChange = (field, date) => {
-        setFormData((prev) => ({ ...prev, [field]: date }));
+        if (!date) {
+            setFormData((prev) => ({ ...prev, [field]: "" }));
+            return;
+        }
+        // Ensure date is correctly formatted in local timezone
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+        const day = String(date.getDate()).padStart(2, "0");
+        const formattedDate = `${year}-${month}-${day}`; // Format as 'YYYY-MM-DD'
+    
+        setFormData((prev) => {
+            const updatedFormData = { ...prev, [field]: formattedDate };
+            
+            // Validation for "Second Visit" date
+            if (field === "secv_id" && updatedFormData.checking_date) {
+                const checkingDate = new Date(updatedFormData.checking_date);
+                const secondVisitDate = new Date(formattedDate);
+                
+                if (secondVisitDate < checkingDate) {
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        secv_id: "Second Visit date cannot be less than Checking Date.",
+                    }));
+                    return prev; // Don't update the state if validation fails
+                } else {
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        secv_id: null, // Clear error if validation passes
+                    }));
+                }
+            }
+    
+            return updatedFormData;
+        });
     };
 
     // Fetch data for editing
@@ -92,6 +134,7 @@ const Ppminfo = () => {
             const response = await fetch(`${url}getbyidppminfo/${id}`);
             const data = await response.json();
             if (response.ok) {
+                
                 // Update the formData state with the fetched data
                 setFormData({
                     panel_id: data.panel_id,
@@ -128,7 +171,7 @@ const Ppminfo = () => {
     const fetchPanelIDs = async (clientName) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${url}api/get_panel_id/${clientName}`);
+            const response = await fetch(`${url}get_panel_id/${clientName}`);
             const data = await response.json();
             if (response.ok) {
                 setPanelIDs(data.panel_ids.map(id => ({ value: id, label: id })));
@@ -202,7 +245,7 @@ const Ppminfo = () => {
         if (!formData.engineer_mobile) newErrors.engineer_mobile = "Engineer mobile is required.";
         if (!formData.address_pincode) newErrors.address_pincode = "Address pincode is required.";
         if (!formData.atm_id) newErrors.atm_id = "ATM ID is required.";
-        if (!formData.secv_id) newErrors.secv_id = "Second Visit is required.";
+        // if (!formData.secv_id) newErrors.secv_id = "Second Visit is required.";
         if (!formData.qcass_id) newErrors.qcass_id = "QC name is required.";
         if (!formData.am_name) newErrors.am_name = "Area Manager name is required.";
 
@@ -236,7 +279,7 @@ const Ppminfo = () => {
     // Get area manager eng_name eng_emp
     const getmapping = async (panel_id, client_id) => {
         try {
-            const response = await fetch(`${url}api/mappings?Panel_Type=${panel_id}`);
+            const response = await fetch(`${url}mappings?Panel_Type=${panel_id}`);
             const data = await response.json();
             
             if (response.ok && data.length > 0) { 
@@ -268,6 +311,7 @@ const Ppminfo = () => {
 
     // Submit form data
     const submitData = async (redirect = false) => {
+        console.log(JSON.stringify(formData));
         if (!validateForm()) {
             alert("Please fill in all required fields.");
             return;
@@ -278,7 +322,7 @@ const Ppminfo = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, checking_date: date }),
+                body: JSON.stringify({...formData, secv_id: formData.secv_id ? formData.secv_id : null,}),
             });
 
             const data = await response.json();
@@ -310,7 +354,7 @@ const Ppminfo = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, checking_date: date }),
+                body: JSON.stringify({...formData, secv_id: formData.secv_id ? formData.secv_id : null,}),
             });
 
             const data = await response.json();
@@ -404,7 +448,7 @@ const Ppminfo = () => {
                                     <DatePicker
                                     className="form-control"
                                     placeholderText="Select start date"
-                                    selected={formData.checking_date}
+                                    selected={formData.checking_date ? new Date(formData.checking_date) : new Date()}
                                     onChange={(date) => handleDateChange("checking_date", date)}
                                     dateFormat="dd/MM/yyyy"
                                     />
@@ -425,7 +469,7 @@ const Ppminfo = () => {
                                     <DatePicker
                                     className="form-control"
                                     placeholderText="Select date"
-                                    selected={formData.secv_id}
+                                    selected={ formData.secv_id ? new Date(formData.secv_id) : null}
                                     onChange={(date) => handleDateChange("secv_id", date)}
                                     dateFormat="dd/MM/yyyy"
                                     />
@@ -445,6 +489,7 @@ const Ppminfo = () => {
                                     placeholder="Enter QC Name"
                                     name="qcass_id"
                                     value={formData.qcass_id}
+                                    // disabled={isQcassIdDisabled} // Disable input field based on state
                                     onChange={handleChange}
                                     autoComplete="off"
                                 />

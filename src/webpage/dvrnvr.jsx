@@ -214,8 +214,20 @@ const DVRNVR = () => {
   };
   
   const handleDateChange = (field, date) => {
-    setFormData((prev) => ({ ...prev, [field]: date }));
-  };
+    if (!date) {
+        setFormData((prev) => ({ ...prev, [field]: "" }));
+        return;
+    }
+
+    // Format date in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`; // Format as 'YYYY-MM-DD'
+
+    setFormData((prev) => ({ ...prev, [field]: formattedDate }));
+};
+
 
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -318,7 +330,7 @@ const DVRNVR = () => {
                       }
                     >
                       <option value="">Camera Count...</option>
-                      {[...Array(16).keys()].map((i) => (
+                      {[...Array(32).keys()].map((i) => (
                         <option key={i + 1} value={i + 1}>
                           {i + 1}
                         </option>
@@ -365,8 +377,9 @@ const DVRNVR = () => {
             <option value="1TB">1TB</option>
             <option value="2TB">2TB</option>
             <option value="4TB">4TB</option>
-            <option value="4TB">6TB</option>
-            <option value="4TB">8TB</option>
+            <option value="6TB">6TB</option>
+            <option value="8TB">8TB</option>
+            <option value="16TB">16TB</option>
           </select>
 
           {/* HDD Serial Number Input */}
@@ -471,13 +484,9 @@ const DVRNVR = () => {
                     {errors.hdd_recording_start}
                   </small>
                 )}
-              </div>
-              
-
-             
-              
-            </div>
-          </div>
+      </div>
+      </div>
+    </div>
 
           <div className="col-lg-6">
             <div className="border border-secondary p-3 rounded">

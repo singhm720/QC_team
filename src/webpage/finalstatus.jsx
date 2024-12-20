@@ -12,9 +12,9 @@ const FinalStatus = () => {
     status: '',
     final_status: '',
     assigned_to: '',
-    today: null,
+    today: '' || new Date().toISOString().split("T")[0],
     rectify: '',
-    month: '',
+    month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).replace(" ", "-"), // Default month value
     quarterly_status: '',
     police_station_no: '',
     fire_station_no: '',
@@ -31,48 +31,105 @@ const FinalStatus = () => {
   const recordId = localStorage.getItem('recordId');
   
   useEffect(() => {
+        const name = sessionStorage.getItem('name')
+
+      // If the 'name' is present, set it in the form data
+      if (name) {
+        setFormData(prevState => ({
+        ...prevState,
+        assigned_to: name
+        }));
+        // Fetch data from the API
+        const fetchData = async () => {
+          try {
+              const response = await fetch(`${url}getbyidppminfo/${recordId}`);
+              const data = await response.json();
+              // Fields to check
+              const fieldsToCheck = [
+                  'ntwoway_id',
+                  'stwoway_id',
+                  'smokes_id',
+                  'panic_id',
+                  'pir_id',
+                  'senser_id',
+                  'siren_status',
+                  'relays_id',
+                  'videocal_id',
+              ];
+
+              // Check for values other than 'Yes' or 'N/A'
+              const faultyIssues = fieldsToCheck
+                  .filter((field) => data[field] && data[field] !== 'Yes' && data[field] !== 'N/A')
+                  .map((field) => `${data[field]}`); // Add field name and its value
+
+              // Update the faulty field
+              setFormData((prevData) => ({
+                  ...prevData,
+                  remark: faultyIssues.join(', ') || data.remark || '', // Default remark
+                  month: data.month || prevData.month, // Use fetched month or existing default
+              }));
+              // console.log("default data" + JSON.stringify(formData))
+          } catch (error) {
+              console.error('Error fetching data:', error);
+          }
+      };
+      fetchData();
+    }  
     if (mode === "edit" && recordId) {
-      fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
-  }
+      fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit' 
+    }
   }, [mode, recordId]);
 
-  const fetchDataForEdit = async (id) => {
+  const fetchDataForEdit = async (id, name) => {
     try {
         const response = await fetch(`${url}getbyidppminfo/${id}`);
         const data = await response.json();
         if (response.ok) {
-            setFormData({
-              remark: data.remark,
-              status: data.status,
-              final_status: data.final_status,
-              assigned_to: data.assigned_to,
-              today: data.today,
-              rectify: data.rectify,
-              month: data.month,
-              quarterly_status: data.quarterly_status,
-              police_station_no: data.police_station_no,
-              fire_station_no: data.fire_station_no,
-              faulty: data.faulty,
-              action_taken: data.action_taken
-            });
+            setFormData((prevState) => ({
+                ...prevState,
+                remark: data.remark ?? prevState.remark, // Use previous value if data.remark is null/undefined
+                status: data.status ?? prevState.status,
+                final_status: data.final_status ?? prevState.final_status,
+                assigned_to: name ?? prevState.assigned_to, // Always use name from session or keep previous
+                today: new Date().toISOString().split("T")[0] ?? prevState.today,
+                rectify: data.rectify ?? prevState.rectify,
+                month: data.month ?? prevState.month,
+                quarterly_status: data.quarterly_status ?? prevState.quarterly_status,
+                police_station_no: data.police_station_no ?? prevState.police_station_no,
+                fire_station_no: data.fire_station_no ?? prevState.fire_station_no,
+                faulty: data.faulty ?? prevState.faulty,
+                action_taken: data.action_taken ?? prevState.action_taken,
+            }));
         } else {
-            alert(`Error: ${data.error}`);
+            console.log(`Error: ${data.error}`);
         }
     } catch (error) {
-        alert('Error fetching data for edit:', error);
+        console.error('Error fetching data for edit:', error);
     }
-  };
+};
 
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
         ...prevData,
-        [name]: value
+        [name]: value,
     }));
   };
   const handleDateChange = (field, date) => {
-    setFormData((prev) => ({ ...prev, [field]: date }));
-  };
+    if (!date) {
+        setFormData((prev) => ({ ...prev, [field]: "" }));
+        return;
+    }
+
+    // Format date in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`; // Format as 'YYYY-MM-DD'
+
+    setFormData((prev) => ({ ...prev, [field]: formattedDate }));
+};
   const validateForm = () => {
     const newErrors = {};
     if (!formData.remark) newErrors.remark = 'Remark is required';
@@ -89,13 +146,11 @@ const FinalStatus = () => {
     if (!formData.action_taken) newErrors.action_taken = 'Action Taken is required';
 
     setErrors(newErrors);
-    console.log(JSON.stringify(formData));
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    console.log(JSON.stringify(formData));
     try {
       const response = await fetch(`${url}update-final-status/${recordId}`, {
         method: 'PUT',
@@ -133,15 +188,15 @@ const FinalStatus = () => {
                 className="basic-single"
                 classNamePrefix="select"
                 name="status"
-                id="status_id"
+                id="status"
                 value={[
                   { value: 'Ok', label: 'Ok' },
-                  { value: 'Not OK', label: 'Not OK' },
+                  { value: 'Not Ok', label: 'Not Ok' },
                 ].find(option => option.value === formData.status)} // Preselect based on fetched data
                 onChange={(selectedOption) => handleChange({ target: { name: 'status', value: selectedOption?.value } })}
                 options={[
                   { value: 'Ok', label: 'Ok' },
-                  { value: 'Not OK', label: 'Not OK' },
+                  { value: 'Not Ok', label: 'Not Ok' },
                 ]}
                 isClearable={true}
                 isSearchable={false}
@@ -150,8 +205,6 @@ const FinalStatus = () => {
               {errors.status && <p className="text-danger">{errors.status}</p>}
             </div>
 
-
-
             <div className="mb-3">
               <label htmlFor="fstatus_id" className="form-label">Final Status:</label>
               <input type="text" className="form-control" id="fstatus_id" placeholder="Enter Final Status" name="final_status" value={formData.final_status} onChange={handleChange} autoComplete="off"/>
@@ -159,8 +212,8 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="assignto_id" className="form-label">Assigned To:</label>
-              <input type="text" className="form-control" id="assignto_id" placeholder="Enter Assigned To" name="assigned_to" value={formData.assigned_to} onChange={handleChange} autoComplete="off"/>
+              <label htmlFor="assigned_to" className="form-label">Assigned To:</label>
+              <input type="text" className="form-control" id="assigned_to" placeholder="Enter Assigned To" name="assigned_to" value={formData.assigned_to} onChange={handleChange} autoComplete="off"/>
               {errors.assigned_to && <div className="text-danger">{errors.assigned_to}</div>}
             </div>
 
@@ -175,7 +228,8 @@ const FinalStatus = () => {
                 <DatePicker
                   className="form-control"
                   placeholderText="Select Date"
-                  selected={formData.today}
+                  selected={formData.today ? new Date(formData.today) : new Date()}
+                  // selected={formData.today}
                   onChange={(date) => handleDateChange("today", date)}
                   dateFormat="dd/MM/yyyy"
                 />
@@ -185,22 +239,51 @@ const FinalStatus = () => {
               )}
             </div>
 
-
             <div className="mb-3">
               <label htmlFor="rectify_id" className="form-label">Rectify:</label>
-              <input type="text" className="form-control" id="rectify_id" placeholder="Enter Rectify" name="rectify" value={formData.rectify} onChange={handleChange} autoComplete="off"/>
-              {errors.rectify && <div className="text-danger">{errors.rectify}</div>}
+              <Select
+                className="basic-single"
+                classNamePrefix="select"
+                name="rectify"
+                id="rectify"
+                value={
+                  formData.rectify
+                    ? { value: formData.rectify, label: formData.rectify } // Map formData.rectify to the option object
+                    : null // Set to null if no value is selected
+                }
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'rectify', value: selectedOption?.value || '' } }) // Update formData on selection
+                }
+                options={[
+                  { value: 'New', label: 'New' },
+                  { value: 'Rectify', label: 'Rectify' },
+                ]}
+                isClearable={true}
+                isSearchable={false}
+                required
+              />
+              {errors.rectify && <p className="text-danger">{errors.rectify}</p>} {/* Display error for rectify field */}
             </div>
+
           </div>
         </div>
 
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
-            <div className="mb-3">
-              <label htmlFor="month_id" className="form-label">Month:</label>
-              <input type="text" className="form-control" id="month_id" placeholder="Enter Month" name="month" value={formData.month} onChange={handleChange} autoComplete="off"/>
-              {errors.month && <div className="text-danger">{errors.month}</div>}
-            </div>
+          <div className="mb-3">
+            <label htmlFor="month" className="form-label">Month:</label>
+            <input
+                type="text"
+                className="form-control"
+                id="month"
+                placeholder="Enter Month"
+                name="month"
+                value={formData.month}
+                onChange={handleChange}
+                autoComplete="off"
+            />
+            {errors.month && <div className="text-danger">{errors.month}</div>}
+        </div>
 
             <div className="mb-3">
               <label htmlFor="quartly_id" className="form-label">Quarterly Status:</label>
@@ -221,10 +304,19 @@ const FinalStatus = () => {
             </div>
 
             <div className="mb-3">
-              <label htmlFor="faulty_id" className="form-label">Faulty:</label>
-              <input type="text" className="form-control" id="faulty_id" placeholder="Enter Faulty" name="faulty" value={formData.faulty} onChange={handleChange} autoComplete="off"/>
-              {errors.faulty && <div className="text-danger">{errors.faulty}</div>}
-            </div>
+            <label htmlFor="faulty_id" className="form-label">Faulty:</label>
+            <input
+                type="text"
+                className="form-control"
+                id="faulty_id"
+                placeholder="Enter Faulty"
+                name="faulty"
+                value={formData.faulty}
+                onChange={handleChange}
+                autoComplete="off"
+            />
+            {errors.faulty && <div className="text-danger">{errors.faulty}</div>}
+        </div>
 
             <div className="mb-3">
               <label htmlFor="actiontk_id" className="form-label">Action Taken:</label>

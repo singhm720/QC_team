@@ -13,160 +13,176 @@ const Login = ({ onLoginSuccess }) => {
   const [countdown, setCountdown] = useState(0); // Countdown for 1 minute
   const navigate = useNavigate();
 
+  // Countdown logic for button re-enabling
   useEffect(() => {
-    let timer;
     if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    } else if (countdown === 0) {
-      setIsButtonDisabled(false); // Enable button after countdown
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setIsButtonDisabled(false);
     }
-    return () => clearTimeout(timer);
   }, [countdown]);
 
-  const handleLoginSubmit = (e) => {
+  // Handle login submission
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    fetch(`${url}login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message === "Login successful") {
-          onLoginSuccess();
-          sessionStorage.setItem("email_id", username);
-          navigate('/dashboard');
-        } else {
-          alert(data.message);
-        }
-      })
-      .catch((error) => {
-        alert('There was an error logging in.');
+    try {
+      const response = await fetch(`${url}login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
       });
+      const data = await response.json();
+      if (data.message === "Login successful") {
+        sessionStorage.setItem("email_id", username);
+        sessionStorage.setItem("user_type", data.user_type);
+        sessionStorage.setItem("access_token", data.access_token);
+        sessionStorage.setItem("name", data.name);
+        onLoginSuccess();
+
+        // Redirect based on user_type
+        if (data.user_type === "Admin") {
+          navigate('/dashboard/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert('There was an error logging in.');
+      console.error("Login error:", error);
+    }
   };
 
-  const handleForgetPasswordSubmit = (e) => {
+  // Handle forget password submission
+  const handleForgetPasswordSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Show buffer bar
-    fetch(`${url}api/checkemail`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setIsLoading(false); // Hide buffer bar
-        if (data.success) { 
-          alert('A password reset link has been sent to your email.');
-          setIsButtonDisabled(true); // Disable submit button
-          setCountdown(60); // Start 1-minute countdown
-        } else if (data.error) {
-          alert(data.error);
-        } else {
-          alert('Something went wrong.');
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false); // Hide buffer bar on error
-        alert('There was an error processing your request.');
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${url}checkemail`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
+      const data = await response.json();
+      setIsLoading(false);
+      if (data.success) {
+        alert('A password reset link has been sent to your email.');
+        setIsButtonDisabled(true);
+        setCountdown(60); // Start countdown
+      } else {
+        alert(data.error || 'Something went wrong.');
+      }
+    } catch (error) {
+      setIsLoading(false);
+      alert('There was an error processing your request.');
+      console.error("Forget password error:", error);
+    }
   };
 
   return (
     <div className="addUser">
-      {!isForgetPassword ? (
-        <>
-          <h3>Sign in</h3>
-          <form className="addUserForm" onSubmit={handleLoginSubmit}>
-            <div className="inputGroup">
-              <label htmlFor="username">Username:</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                autoComplete="off"
-                placeholder="Enter your Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              <label htmlFor="password">Password:</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                autoComplete="off"
-                placeholder="Enter your Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn btn-primary">
-                Login
-              </button>
-              <p
-                style={{
-                  textAlign: "right",
-                  cursor: "pointer",
-                  color: "blue",
-                  textDecoration: "underline",
-                }}
-                onClick={() => setIsForgetPassword(true)} // Toggle form
-              >
-                Forget password?
-              </p>
-            </div>
-          </form>
-        </>
+      {isForgetPassword ? (
+        <ForgetPasswordForm
+          email={email}
+          setEmail={setEmail}
+          isButtonDisabled={isButtonDisabled}
+          isLoading={isLoading}
+          countdown={countdown}
+          handleForgetPasswordSubmit={handleForgetPasswordSubmit}
+          toggleForm={() => setIsForgetPassword(false)}
+        />
       ) : (
-        <>
-          <h3>Forget Password</h3>
-          <form className="addUserForm" onSubmit={handleForgetPasswordSubmit}>
-            <div className="inputGroup">
-              <label htmlFor="email">Enter your Email ID:</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                autoComplete="off"
-                placeholder="Enter your Email ID"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isButtonDisabled || isLoading} // Disable button if loading or countdown
-              >
-                {isLoading ? "Processing..." : "Submit"}
-              </button>
-              {countdown > 0 && (
-                <p style={{ color: "red" }}>
-                  Please wait {countdown} seconds before trying again.
-                </p>
-              )}
-              <p
-                style={{
-                  textAlign: "right",
-                  cursor: "pointer",
-                  color: "blue",
-                  textDecoration: "underline",
-                }}
-                onClick={() => setIsForgetPassword(false)} // Toggle back
-              >
-                Back to Sign In
-              </p>
-            </div>
-          </form>
-        </>
+        <LoginForm
+          username={username}
+          password={password}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          handleLoginSubmit={handleLoginSubmit}
+          toggleForm={() => setIsForgetPassword(true)}
+        />
       )}
     </div>
   );
 };
+
+const LoginForm = ({ username, password, setUsername, setPassword, handleLoginSubmit, toggleForm }) => (
+  <>
+    <h3>Sign in</h3>
+    <form className="addUserForm" onSubmit={handleLoginSubmit}>
+      <div className="inputGroup">
+        <label htmlFor="username">Username:</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          autoComplete="off"
+          placeholder="Enter your Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autoComplete="off"
+          placeholder="Enter your Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit" className="btn btn-primary">
+          Login
+        </button>
+        <p
+          style={{ textAlign: "right", cursor: "pointer", color: "blue", textDecoration: "underline" }}
+          onClick={toggleForm}
+        >
+          Forget password?
+        </p>
+      </div>
+    </form>
+  </>
+);
+
+const ForgetPasswordForm = ({ email, setEmail, isButtonDisabled, isLoading, countdown, handleForgetPasswordSubmit, toggleForm }) => (
+  <>
+    <h3>Forget Password</h3>
+    <form className="addUserForm" onSubmit={handleForgetPasswordSubmit}>
+      <div className="inputGroup">
+        <label htmlFor="email">Enter your Email ID:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          autoComplete="off"
+          placeholder="Enter your Email ID"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <button type="submit" className="btn btn-primary" disabled={isButtonDisabled || isLoading}>
+          {isLoading ? "Processing..." : "Submit"}
+        </button>
+        {countdown > 0 && (
+          <p style={{ color: "red" }}>Please wait {countdown} seconds before trying again.</p>
+        )}
+        <p
+          style={{ textAlign: "right", cursor: "pointer", color: "blue", textDecoration: "underline" }}
+          onClick={toggleForm}
+        >
+          Back to Sign In
+        </p>
+      </div>
+    </form>
+  </>
+);
 
 export default Login;
