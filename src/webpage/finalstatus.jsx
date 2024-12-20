@@ -12,9 +12,9 @@ const FinalStatus = () => {
     status: '',
     final_status: '',
     assigned_to: '',
-    today: '',
+    today: '' || new Date().toISOString().split("T")[0],
     rectify: '',
-    month: '',
+    month: new Date().toLocaleDateString('en-US', { month: 'short', year: '2-digit' }).replace(" ", "-"), // Default month value
     quarterly_status: '',
     police_station_no: '',
     fire_station_no: '',
@@ -32,13 +32,6 @@ const FinalStatus = () => {
   
   useEffect(() => {
         const name = sessionStorage.getItem('name')
-        const currentDate = new Date();
-        const options = { month: 'short', year: '2-digit' };
-        const formattedMonthYear = currentDate.toLocaleDateString('en-US', options).replace(" ", "-");
-        setFormData(prevData => ({
-          ...prevData,
-          month: formattedMonthYear // Set default month value
-      }));
 
       // If the 'name' is present, set it in the form data
       if (name) {
@@ -72,19 +65,18 @@ const FinalStatus = () => {
               // Update the faulty field
               setFormData((prevData) => ({
                   ...prevData,
-                  remark: faultyIssues.join(', '), // Concatenate issues into a single string
+                  remark: faultyIssues.join(', ') || data.remark || '', // Default remark
+                  month: data.month || prevData.month, // Use fetched month or existing default
               }));
+              // console.log("default data" + JSON.stringify(formData))
           } catch (error) {
               console.error('Error fetching data:', error);
           }
       };
-
       fetchData();
-
     }  
     if (mode === "edit" && recordId) {
-      fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit'
-      
+      fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit' 
     }
   }, [mode, recordId]);
 
@@ -93,34 +85,35 @@ const FinalStatus = () => {
         const response = await fetch(`${url}getbyidppminfo/${id}`);
         const data = await response.json();
         if (response.ok) {
-            setFormData({
-              remark: data.remark,
-              status: data.status,
-              final_status: data.final_status,
-              assigned_to: name,
-              today: data.today,
-              rectify: data.rectify,
-              month: data.month,
-              quarterly_status: data.quarterly_status,
-              police_station_no: data.police_station_no,
-              fire_station_no: data.fire_station_no,
-              faulty: data.faulty,
-              action_taken: data.action_taken
-            });
-
+            setFormData((prevState) => ({
+                ...prevState,
+                remark: data.remark ?? prevState.remark, // Use previous value if data.remark is null/undefined
+                status: data.status ?? prevState.status,
+                final_status: data.final_status ?? prevState.final_status,
+                assigned_to: name ?? prevState.assigned_to, // Always use name from session or keep previous
+                today: new Date().toISOString().split("T")[0] ?? prevState.today,
+                rectify: data.rectify ?? prevState.rectify,
+                month: data.month ?? prevState.month,
+                quarterly_status: data.quarterly_status ?? prevState.quarterly_status,
+                police_station_no: data.police_station_no ?? prevState.police_station_no,
+                fire_station_no: data.fire_station_no ?? prevState.fire_station_no,
+                faulty: data.faulty ?? prevState.faulty,
+                action_taken: data.action_taken ?? prevState.action_taken,
+            }));
         } else {
-            alert(`Error: ${data.error}`);
+            console.log(`Error: ${data.error}`);
         }
     } catch (error) {
-        alert('Error fetching data for edit:', error);
+        console.error('Error fetching data for edit:', error);
     }
-  };
+};
+
   
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
         ...prevData,
-        [name]: value
+        [name]: value,
     }));
   };
   const handleDateChange = (field, date) => {
@@ -195,15 +188,15 @@ const FinalStatus = () => {
                 className="basic-single"
                 classNamePrefix="select"
                 name="status"
-                id="status_id"
+                id="status"
                 value={[
                   { value: 'Ok', label: 'Ok' },
-                  { value: 'Not OK', label: 'Not OK' },
+                  { value: 'Not Ok', label: 'Not Ok' },
                 ].find(option => option.value === formData.status)} // Preselect based on fetched data
                 onChange={(selectedOption) => handleChange({ target: { name: 'status', value: selectedOption?.value } })}
                 options={[
                   { value: 'Ok', label: 'Ok' },
-                  { value: 'Not OK', label: 'Not OK' },
+                  { value: 'Not Ok', label: 'Not Ok' },
                 ]}
                 isClearable={true}
                 isSearchable={false}
@@ -211,8 +204,6 @@ const FinalStatus = () => {
               />
               {errors.status && <p className="text-danger">{errors.status}</p>}
             </div>
-
-
 
             <div className="mb-3">
               <label htmlFor="fstatus_id" className="form-label">Final Status:</label>
@@ -237,7 +228,7 @@ const FinalStatus = () => {
                 <DatePicker
                   className="form-control"
                   placeholderText="Select Date"
-                  selected={formData.today ? new Date(formData.today) : null}
+                  selected={formData.today ? new Date(formData.today) : new Date()}
                   // selected={formData.today}
                   onChange={(date) => handleDateChange("today", date)}
                   dateFormat="dd/MM/yyyy"
@@ -248,25 +239,21 @@ const FinalStatus = () => {
               )}
             </div>
 
-
-            {/* <div className="mb-3">
-              <label htmlFor="rectify_id" className="form-label">Rectify:</label>
-              <input type="text" className="form-control" id="rectify_id" placeholder="Enter Rectify" name="rectify" value={formData.rectify} onChange={handleChange} autoComplete="off"/>
-              {errors.rectify && <div className="text-danger">{errors.rectify}</div>}
-            </div> */}
-
             <div className="mb-3">
               <label htmlFor="rectify_id" className="form-label">Rectify:</label>
               <Select
                 className="basic-single"
                 classNamePrefix="select"
                 name="rectify"
-                id="rectify_id"
-                value={[
-                  { value: 'New', label: 'New' },
-                  { value: 'Rectify', label: 'Rectify' },
-                ].find(option => option.value === formData.rectify)} // Preselect based on fetched data
-                onChange={(selectedOption) => handleChange({ target: { name: 'rectify', value: selectedOption?.value } })}
+                id="rectify"
+                value={
+                  formData.rectify
+                    ? { value: formData.rectify, label: formData.rectify } // Map formData.rectify to the option object
+                    : null // Set to null if no value is selected
+                }
+                onChange={(selectedOption) =>
+                  handleChange({ target: { name: 'rectify', value: selectedOption?.value || '' } }) // Update formData on selection
+                }
                 options={[
                   { value: 'New', label: 'New' },
                   { value: 'Rectify', label: 'Rectify' },
@@ -275,9 +262,8 @@ const FinalStatus = () => {
                 isSearchable={false}
                 required
               />
-              {errors.status && <p className="text-danger">{errors.status}</p>}
+              {errors.rectify && <p className="text-danger">{errors.rectify}</p>} {/* Display error for rectify field */}
             </div>
-
 
           </div>
         </div>
@@ -285,11 +271,11 @@ const FinalStatus = () => {
         <div className="col-lg-6">
           <div className="border border-secondary p-3 rounded">
           <div className="mb-3">
-            <label htmlFor="month_id" className="form-label">Month:</label>
+            <label htmlFor="month" className="form-label">Month:</label>
             <input
                 type="text"
                 className="form-control"
-                id="month_id"
+                id="month"
                 placeholder="Enter Month"
                 name="month"
                 value={formData.month}

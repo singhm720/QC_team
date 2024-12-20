@@ -19,7 +19,7 @@ const Ppminfo = () => {
         panel_id: '',
         client_id: '',
         merg_id: '',
-        checking_date: '',
+        checking_date: '' || new Date().toISOString().split("T")[0],
         secv_id: '',
         qcass_id: '',
         am_name: '',
@@ -96,7 +96,6 @@ const Ppminfo = () => {
             setFormData((prev) => ({ ...prev, [field]: "" }));
             return;
         }
-    
         // Ensure date is correctly formatted in local timezone
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
@@ -105,16 +104,16 @@ const Ppminfo = () => {
     
         setFormData((prev) => {
             const updatedFormData = { ...prev, [field]: formattedDate };
-    
+            
             // Validation for "Second Visit" date
             if (field === "secv_id" && updatedFormData.checking_date) {
                 const checkingDate = new Date(updatedFormData.checking_date);
                 const secondVisitDate = new Date(formattedDate);
-    
+                
                 if (secondVisitDate < checkingDate) {
                     setErrors((prevErrors) => ({
                         ...prevErrors,
-                        secv_id: "Second Visit date cannot be earlier than Checking Date.",
+                        secv_id: "Second Visit date cannot be less than Checking Date.",
                     }));
                     return prev; // Don't update the state if validation fails
                 } else {
@@ -131,7 +130,6 @@ const Ppminfo = () => {
 
     // Fetch data for editing
     const fetchDataForEdit = async (id) => {
-        debugger;
         try {
             const response = await fetch(`${url}getbyidppminfo/${id}`);
             const data = await response.json();
@@ -313,6 +311,7 @@ const Ppminfo = () => {
 
     // Submit form data
     const submitData = async (redirect = false) => {
+        console.log(JSON.stringify(formData));
         if (!validateForm()) {
             alert("Please fill in all required fields.");
             return;
@@ -349,7 +348,6 @@ const Ppminfo = () => {
             alert("Please fill in all required fields.");
             return;
         }
-        console.log(JSON.stringify(formData))
         try {
             const response = await fetch(`${url}update-entry/${recordId}`, {
                 method: 'PUT',
@@ -450,7 +448,7 @@ const Ppminfo = () => {
                                     <DatePicker
                                     className="form-control"
                                     placeholderText="Select start date"
-                                    selected={ formData.checking_date ? new Date(formData.checking_date) : null}
+                                    selected={formData.checking_date ? new Date(formData.checking_date) : new Date()}
                                     onChange={(date) => handleDateChange("checking_date", date)}
                                     dateFormat="dd/MM/yyyy"
                                     />
