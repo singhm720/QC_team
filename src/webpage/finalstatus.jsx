@@ -37,7 +37,8 @@ const FinalStatus = () => {
       if (name) {
         setFormData(prevState => ({
         ...prevState,
-        assigned_to: name
+        assigned_to: name,
+        quarterly_status: getCurrentQuarter(),
         }));
         // Fetch data from the API
         const fetchData = async () => {
@@ -79,7 +80,15 @@ const FinalStatus = () => {
       fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit' 
     }
   }, [mode, recordId]);
-
+  // Function to determine the current quarter
+  const getCurrentQuarter = () => {
+    const month = new Date().getMonth() + 1; // getMonth() returns 0-11, so add 1
+    if (month >= 1 && month <= 3) return 'Q1';
+    if (month >= 4 && month <= 6) return 'Q2';
+    if (month >= 7 && month <= 9) return 'Q3';
+    if (month >= 10 && month <= 12) return 'Q4';
+    return '';
+};
   const fetchDataForEdit = async (id, name) => {
     try {
         const response = await fetch(`${url}getbyidppminfo/${id}`);
@@ -90,7 +99,7 @@ const FinalStatus = () => {
                 remark: data.remark ?? prevState.remark, // Use previous value if data.remark is null/undefined
                 status: data.status ?? prevState.status,
                 final_status: data.final_status ?? prevState.final_status,
-                assigned_to: name ?? prevState.assigned_to, // Always use name from session or keep previous
+                assigned_to: data.assigned_to || name, // Always use name from session or keep previous
                 today: new Date().toISOString().split("T")[0] ?? prevState.today,
                 rectify: data.rectify ?? prevState.rectify,
                 month: data.month ?? prevState.month,
@@ -285,11 +294,27 @@ const FinalStatus = () => {
             {errors.month && <div className="text-danger">{errors.month}</div>}
         </div>
 
-            <div className="mb-3">
-              <label htmlFor="quartly_id" className="form-label">Quarterly Status:</label>
-              <input type="text" className="form-control" id="quartly_id" placeholder="Enter Quarterly Status" name="quarterly_status" value={formData.quarterly_status} onChange={handleChange} autoComplete="off"/>
-              {errors.quarterly_status && <div className="text-danger">{errors.quarterly_status}</div>}
-            </div>
+        <div className="mb-3">
+          <label htmlFor="quartly_id" className="form-label">Quarterly Status:</label>
+          <Select
+            id="quartly_id"
+            name="quarterly_status"
+            value={formData.quarterly_status ? { value: formData.quarterly_status, label: formData.quarterly_status } : null}
+            onChange={(selectedOption) =>
+              handleChange({ target: { name: 'quarterly_status', value: selectedOption?.value || '' } })
+            }
+            options={[
+              { value: 'Q1', label: 'Q1 (Jan - Mar)' },
+              { value: 'Q2', label: 'Q2 (Apr - Jun)' },
+              { value: 'Q3', label: 'Q3 (Jul - Sep)' },
+              { value: 'Q4', label: 'Q4 (Oct - Dec)' },
+            ]}
+            isClearable={true}
+            isSearchable={false}
+            required
+          />
+          {errors.quarterly_status && <div className="text-danger">{errors.quarterly_status}</div>}
+        </div>
 
             <div className="mb-3">
               <label htmlFor="polist_id" className="form-label">Police Station No:</label>
@@ -340,6 +365,9 @@ const FinalStatus = () => {
                     <button type="button" className="btn btn-success me-2" onClick={handleSave}>
                       Save
                     </button>
+                    <p className="text-danger">
+                     Note:- You wont be able to Edit the data once you click on Update
+                  </p>
                       </>
                   )}
                 </div>

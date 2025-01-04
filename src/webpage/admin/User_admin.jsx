@@ -104,7 +104,7 @@ const UserAdmin = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${url}delete_user/${id}`);
+      await axios.delete(`${url}deleteuser/${id}`);
       showAlert("User deleted successfully", "success");
       fetchUsers();
     } catch (error) {

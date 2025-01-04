@@ -134,6 +134,10 @@ const DAdmin = () => {
             alert('Please select both start and end dates.');
             return;
         }
+        if (startDate <= endDate) {
+            alert('Start date must be earlier than end date.');
+            return;
+        }
 
         const start = startDate.toISOString().split('T')[0];
         const end = endDate.toISOString().split('T')[0];
