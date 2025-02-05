@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Select from "react-select";
 import url from "../config";
+import { decode as base64Decode } from 'base-64';
 
 const RouterInfo = () => {
   const [formData, setFormData] = useState({
@@ -97,7 +98,15 @@ const RouterInfo = () => {
     }
     if (mode === "edit" && recordId) {
       fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
-  }
+    }
+    const mode1 = new URLSearchParams(location.search).get('mode');
+    const encryptedId = new URLSearchParams(location.search).get('id');
+    if (encryptedId) {
+      const ids = base64Decode(encryptedId); // Decrypt the ID
+      if (mode1 === "editnew") {
+        fetchDataForEdit(ids);
+      }
+    }
   }, [mode, recordId]);
 
   const fetchDataForEdit = async (id) => {
@@ -171,7 +180,14 @@ const RouterInfo = () => {
       const data = await response.json();
       if (response.ok) {
         alert(data.message);
-        if (redirect) navigate('/dashboard/infrastructure');
+        const mode = new URLSearchParams(location.search).get('mode');
+          const id = new URLSearchParams(location.search).get('id');
+          if (mode === 'editnew' && redirect) {
+            navigate(`/dashboard/infrastructure?mode=editnew&id=${id}`);
+          }
+          else {
+            navigate("/dashboard/routerinfo");
+          }
       } else alert(`Error: ${data.error}`);
     } catch (error) {
       alert('There was an error submitting the form.');

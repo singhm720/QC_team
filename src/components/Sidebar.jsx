@@ -9,15 +9,19 @@ const Sidebar = ({ sidebarToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isEditMode = new URLSearchParams(location.search).get('mode') === 'edit';
+  const isEditMode = new URLSearchParams(location.search).get('mode');
+  const id = new URLSearchParams(location.search).get('id');
 
   const handleNavigation = (path) => {
-    if (recordId && isPPMInfoSaved) {
-      navigate(`${path}?mode=edit`);
+    if (isEditMode === 'edit') {
+        navigate(`${path}?mode=edit`);
+    } else if (isEditMode === 'editnew') {
+        navigate(`${path}?mode=editnew&id=${id}`);
     } else {
-      navigate(path);
+        navigate(path);
     }
-  };
+};
+
 
   useEffect(() => {
     const handleStorageChange = () => {

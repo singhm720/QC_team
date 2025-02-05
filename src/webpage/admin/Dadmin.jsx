@@ -132,11 +132,12 @@ const DAdmin = () => {
     const handleDownloadReport = async () => {
         const start = startDate.toISOString().split('T')[0];
         const end = endDate.toISOString().split('T')[0];
+        console.log('start:', start, 'end:', end);
         if (!start || !end) {
             alert('Please select both start and end dates.');
             return;
         }
-        if (start >= end) {
+        if (start > end) {
             alert('Start date must be earlier than end date.');
             return;
         }

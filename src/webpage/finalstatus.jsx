@@ -6,6 +6,8 @@ import { BsCalendar2DateFill } from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import Select from "react-select";
 import "react-datepicker/dist/react-datepicker.css";
+import { decode as base64Decode } from 'base-64';
+
 const FinalStatus = () => {
   const [formData, setFormData] = useState({
     remark: '',
@@ -32,7 +34,6 @@ const FinalStatus = () => {
   
   useEffect(() => {
         const name = sessionStorage.getItem('name')
-
       // If the 'name' is present, set it in the form data
       if (name) {
         setFormData(prevState => ({
@@ -79,14 +80,22 @@ const FinalStatus = () => {
     if (mode === "edit" && recordId) {
       fetchDataForEdit(recordId, name);  // Fetch data for editing if mode is 'edit' 
     }
+    const mode1 = new URLSearchParams(location.search).get('mode');
+    const encryptedId = new URLSearchParams(location.search).get('id');
+    if (encryptedId) {
+      const ids = base64Decode(encryptedId); // Decrypt the ID
+      if (mode1 === "editnew") {
+        fetchDataForEdit(ids);
+      }
+    }
   }, [mode, recordId]);
   // Function to determine the current quarter
   const getCurrentQuarter = () => {
     const month = new Date().getMonth() + 1; // getMonth() returns 0-11, so add 1
-    if (month >= 1 && month <= 3) return 'Q1';
-    if (month >= 4 && month <= 6) return 'Q2';
-    if (month >= 7 && month <= 9) return 'Q3';
-    if (month >= 10 && month <= 12) return 'Q4';
+    if (month >= 1 && month <= 3) return 'Q4';
+    if (month >= 4 && month <= 6) return 'Q1';
+    if (month >= 7 && month <= 9) return 'Q2';
+    if (month >= 10 && month <= 12) return 'Q3';
     return '';
 };
   const fetchDataForEdit = async (id, name) => {
@@ -304,10 +313,10 @@ const FinalStatus = () => {
               handleChange({ target: { name: 'quarterly_status', value: selectedOption?.value || '' } })
             }
             options={[
-              { value: 'Q1', label: 'Q1 (Jan - Mar)' },
-              { value: 'Q2', label: 'Q2 (Apr - Jun)' },
-              { value: 'Q3', label: 'Q3 (Jul - Sep)' },
-              { value: 'Q4', label: 'Q4 (Oct - Dec)' },
+              { value: 'Q4', label: 'Q4 (Jan - Mar)' },
+              { value: 'Q1', label: 'Q1 (Apr - Jun)' },
+              { value: 'Q2', label: 'Q2 (Jul - Sep)' },
+              { value: 'Q3', label: 'Q3 (Oct - Dec)' },
             ]}
             isClearable={true}
             isSearchable={false}
@@ -365,9 +374,6 @@ const FinalStatus = () => {
                     <button type="button" className="btn btn-success me-2" onClick={handleSave}>
                       Save
                     </button>
-                    <p className="text-danger">
-                     Note:- You wont be able to Edit the data once you click on Update
-                  </p>
                       </>
                   )}
                 </div>

@@ -5,10 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import DatePicker from "react-datepicker";
 import DataTable from 'react-data-table-component';
 import './Reports.css';
+import Select from "react-select";
 import SetLoading from '../webpage/setloading';
 import url from '../config';
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from 'date-fns';
+import { encode as base64Encode } from 'base-64'; // Install base-64 package if not already installed
 
 const Reports = () => {
     const [startDate, setStartDate] = useState(new Date());
@@ -17,7 +19,11 @@ const Reports = () => {
     const [records, setRecords] = useState([]);
     const [isLoading, setIsLoading] = useState(true); // Loader state
     const [searchTerm, setSearchTerm] = useState('');
-    const [email_id, setEmail_id] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [selectedClient, setSelectedClient] = useState("");
+    const [clientOptions, setClientOptions] = useState([]);
+    const [selectedPanel, setSelectedPanel] = useState(null);
+    const [panelOptions, setPanelOptions] = useState([]);
 
     const navigate = useNavigate();
     //function to handle new button click
@@ -25,9 +31,20 @@ const Reports = () => {
         localStorage.clear();
         navigate('/dashboard/ppminfo');
     }
-    const handleRectify = () =>{
-        alert("Coming Soon...")
-    }
+    const handleReuseEntry = () => {
+        setShowModal(true);
+    };
+
+    // Function to encrypt the ID
+    const encrypt = (text) => {
+        return base64Encode(text);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedClient("");
+        setPanelIds([]);
+    };
     // Function to handle edit button click
     const handleEdit = (row) => {
         // Save data to localStorage
@@ -63,11 +80,102 @@ const Reports = () => {
                 setIsLoading(false); // End loading
             }
         };
+        if (showModal) {
+            fetch(`${url}client_name`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch client names");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.client_names) {
+                        const options = data.client_names.map((name) => ({
+                            value: name,
+                            label: name,
+                        }));
+                        setClientOptions(options);
+                    }
+                })
+                .catch((error) => console.error("Error fetching client names:", error));
+        }
     
         fetchData();
-    }, [url]);
+    }, [url, showModal]);
     
+    // Fetch panel IDs when a client is selected
+    useEffect(() => {
+        if (selectedClient) {
+            fetch(`${url}get_panel_id/${encodeURIComponent(selectedClient.value)}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch panel IDs");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.panel_ids) {
+                        const options = data.panel_ids.map((id) => ({
+                            value: id,
+                            label: id,
+                        }));
+                        setPanelOptions(options);
+                    }
+                })
+                .catch((error) => console.error("Error fetching panel IDs:", error));
+        } else {
+            setPanelOptions([]); // Clear panel options if no client is selected
+        }
+    }, [selectedClient]);
     
+    // Function to get data for 2nd entry after his current quarter finished.
+    const getpmdata = (selectedClient, selectedPanel) => {
+        if (!selectedClient || !selectedPanel) {
+            alert("Please select both a client and a panel ID.");
+            return;
+        }
+    
+        const merge = selectedPanel.value + selectedClient.value;
+        fetch(`${url}getmergedata/${merge}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch data");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                // Determine the current quarter start date
+                const now = new Date();
+                const currentQuarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+                // Parse and find the latest entry within the current quarter
+                let latestEntry = null;
+                data.forEach((item) => {
+                    const createdAt = new Date(item.created_at);
+                    if (
+                        item.merg_id === merge &&
+                        createdAt >= currentQuarterStart &&
+                        (!latestEntry || createdAt > new Date(latestEntry.created_at))
+                    ) {
+                        latestEntry = item;
+                    }
+                });
+                if (latestEntry) {
+                    alert("Data already exists. You can edit it from the edit function.");
+                } else {
+                    // If no matching entry was found, get the ID of the latest entry
+                    const latestId = data.length > 0 ? data[data.length - 1].id : null; // Assuming latest ID is the last one
+                    if (latestId) {
+                        const encryptedId = encrypt(latestId.toString()); // Encrypt the ID
+                        navigate(`/dashboard/ppminfo?mode=editnew&id=${encryptedId}`);
+                    } else {
+                        alert("No data available to proceed.");
+                    }
+                }
+            })
+            .catch((error) => {
+                alert("Data Not Found in Database u can create New Entry.");
+            });
+    };
     // Columns for DataTable
     const columns = [
         {
@@ -308,9 +416,9 @@ const Reports = () => {
                 </button>
                 <button
                     className="btn btn-primary btn-sm me-2"
-                    onClick={() => handleRectify()}
+                    onClick={() => handleReuseEntry()}
                 >
-                    Rectify
+                    Old
                 </button>
             </div>
             </div>
@@ -324,7 +432,77 @@ const Reports = () => {
                 />
             </div>
             </>
-        )}  
+        )} 
+         {/* Modal */}
+         {showModal && (
+                <div className="modal d-block" tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Select Options</h5>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    aria-label="Close"
+                                    onClick={closeModal}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="client_select" className="form-label">
+                                        Select Client:
+                                    </label>
+                                    <Select
+                                        className="basic-single"
+                                        id="client_select"
+                                        name="client_select"
+                                        value={selectedClient}
+                                        onChange={setSelectedClient}
+                                        options={clientOptions}
+                                        isClearable={true}
+                                        isSearchable={true}
+                                        placeholder="Select a client..."
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="panel_select" className="form-label">
+                                        Select Panel ID:
+                                    </label>
+                                    <Select
+                                        className="basic-single"
+                                        id="panel_select"
+                                        name="panel_select"
+                                        value={selectedPanel}
+                                        onChange={setSelectedPanel}
+                                        options={panelOptions}
+                                        isClearable={true}
+                                        isSearchable={true}
+                                        placeholder="Select a panel ID..."
+                                        isDisabled={!panelOptions.length}
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={closeModal}
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => getpmdata(selectedClient, selectedPanel)}
+                                >
+                                    Next
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
     </div>
 );
 

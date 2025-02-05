@@ -2,6 +2,7 @@ import React, { useState, useEffect} from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import url from "../config";
+import { decode as base64Decode } from 'base-64';
 
 const Infrastructure = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +21,15 @@ const Infrastructure = () => {
   useEffect(() => {
     if (mode === "edit" && recordId) {
       fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
-  }
+    }
+    const mode1 = new URLSearchParams(location.search).get('mode');
+    const encryptedId = new URLSearchParams(location.search).get('id');
+      if (encryptedId) {
+        const ids = base64Decode(encryptedId); // Decrypt the ID
+        if (mode1 === "editnew") {
+          fetchDataForEdit(ids);
+        }
+      }
   }, [mode, recordId]);
   
   const fetchDataForEdit = async (id) => {
@@ -96,7 +105,14 @@ const Infrastructure = () => {
     e.preventDefault();
     if (validateForm()) {
       await handleSubmit();
-      navigate('/dashboard/finalstatus');
+      const mode = new URLSearchParams(location.search).get('mode');
+          const id = new URLSearchParams(location.search).get('id');
+          if (mode === 'editnew') {
+            navigate(`/dashboard/finalstatus?mode=editnew&id=${id}`);
+          }
+          else {
+            navigate("/dashboard/finalstatus");
+          }
     }
   };
 
