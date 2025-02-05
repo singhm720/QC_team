@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useNavigate } from 'react-router-dom';
 import url from "../config";
+import { decode as base64Decode } from 'base-64';
 
 const SenserStatus = () => {
     const [formData, setFormData] = useState({
@@ -50,6 +51,14 @@ const SenserStatus = () => {
         if (mode === "edit" && recordId) {
             fetchDataForEdit(recordId); // Fetch data for editing if mode is 'edit'
           }
+        const mode1 = new URLSearchParams(location.search).get('mode');
+        const encryptedId = new URLSearchParams(location.search).get('id');
+        if (encryptedId) {
+            const ids = base64Decode(encryptedId); // Decrypt the ID
+            if (mode1 === "editnew") {
+                fetchDataForEdit(ids);
+            }
+        }
     }, [mode, recordId]);
     
     const fetchDataForEdit = async (id) => {
@@ -193,7 +202,17 @@ const SenserStatus = () => {
     const handleSaveAndNext = async (e) => {
         e.preventDefault();
         await handleSubmit();
-        navigate('/dashboard/routerinfo');
+        if (!validateForm()) {
+            return;
+          }
+          const mode = new URLSearchParams(location.search).get('mode');
+          const id = new URLSearchParams(location.search).get('id');
+          if (mode === 'editnew') {
+            navigate(`/dashboard/routerinfo?mode=editnew&id=${id}`);
+          }
+          else {
+            navigate("/dashboard/routerinfo");
+          }
     };
 
     return (

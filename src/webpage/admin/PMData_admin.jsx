@@ -97,9 +97,9 @@ const PMAdmin = () => {
 
   // Filter data based on search term
   const filteredData = Array.isArray(mappingData)
-    ? mappingData.filter((item) =>
-        Object.values(item).some((value) =>
-          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    ? mappingData.filter((item) =>  
+        Object.values(item).some(
+          (value) => value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
       )
     : [];
@@ -108,6 +108,31 @@ const PMAdmin = () => {
     fetchallppmdata(); // Fetch data on component mount
   }, []);
 
+  const handleDelete = async (row) => {
+    // Display a confirmation dialog before proceeding
+    const isConfirmed = window.confirm(`Are you sure you want to delete this Panel: ${row.panel_id}?`);
+    
+    if (!isConfirmed) {
+      return; // Exit if the user cancels the action
+    }
+  
+    // Proceed with deletion if confirmed
+    setAlert({ message: `Deleting entry with ID: ${row.id}` });
+  
+    try {
+      const response = await axios.delete(`${url}deleteppmbyid/${row.id}`);
+      if (response.status === 200) {
+        setAlert({ message: `Entry with Panel: ${row.panel_id} deleted successfully!` });
+        // Optionally update your local state to reflect the deletion
+        fetchallppmdata()
+      } else {
+        setAlert({ message: `Failed to delete entry with ID: ${row.id}` });
+      }
+    } catch (error) {
+      setAlert({ message: `Error deleting entry with ID: ${row.id}: ${error.message}` });
+    }
+  };
+  
   const columns = [
     { name: "Panel ID", selector: (row) => row.panel_id, sortable: true },
     { name: "Client", selector: (row) => row.client_id, sortable: true },
@@ -115,6 +140,20 @@ const PMAdmin = () => {
     { name: "Engineer Name", selector: (row) => row.engineer_name, sortable: true },
     { name: "Employee Code", selector: (row) => row.e_code, sortable: true },
     { name: "Status", selector: (row) => row.status, sortable: true },
+    {
+      name: "Action",
+      cell: row => (
+              <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(row)}
+              >
+                  Delete
+              </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+  }
   ];
 
   return (

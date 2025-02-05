@@ -7,6 +7,8 @@ import { BsCalendar2DateFill } from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+import { decode as base64Decode } from 'base-64';
+
 const Ppminfo = () => {
     const navigate = useNavigate();
     const location = useLocation(); // to get query params like mode and id
@@ -43,6 +45,7 @@ const Ppminfo = () => {
 
     // Fetch client names
     useEffect(() => {
+        debugger;
         const fetchClientNames = async () => {
             try {
                 const response = await fetch(`${url}client_name`);
@@ -85,9 +88,16 @@ const Ppminfo = () => {
         }
         fetchClientNames();
         getAreaManager();
-
         if (mode === "edit" && recordId) {
             fetchDataForEdit(recordId);  // Fetch data for editing if mode is 'edit'
+        }
+        const mode1 = new URLSearchParams(location.search).get('mode');
+        const encryptedId = new URLSearchParams(location.search).get('id');
+        if (encryptedId) {
+            const ids = base64Decode(encryptedId); // Decrypt the ID
+            if (mode1 === "editnew") {
+                fetchDataForEdit(ids);
+            }
         }
     }, [mode, recordId]);
 
@@ -378,6 +388,17 @@ const Ppminfo = () => {
     const handleSaveAndNext = async (e) => {
         e.preventDefault();
         await submitData(true);
+        if (!validateForm()) {
+            return;
+          }
+          const mode = new URLSearchParams(location.search).get('mode');
+          const id = new URLSearchParams(location.search).get('id');
+          if (mode === 'editnew') {
+            navigate(`/dashboard/dvrnvr?mode=editnew&id=${id}`);
+          }
+          else {
+            navigate("/dashboard/senserstatus");
+          }
     };
 
     return (

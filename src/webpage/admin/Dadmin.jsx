@@ -130,14 +130,17 @@ const DAdmin = () => {
 
     // Handle report download
     const handleDownloadReport = async () => {
-        if (!startDate || !endDate) {
+        const start = startDate.toISOString().split('T')[0];
+        const end = endDate.toISOString().split('T')[0];
+        console.log('start:', start, 'end:', end);
+        if (!start || !end) {
             alert('Please select both start and end dates.');
             return;
         }
-
-        const start = startDate.toISOString().split('T')[0];
-        const end = endDate.toISOString().split('T')[0];
-
+        if (start > end) {
+            alert('Start date must be earlier than end date.');
+            return;
+        }
         try {
             const response = await fetch(`${url}download-report?start_date=${start}&end_date=${end}`, {
                 method: 'GET',

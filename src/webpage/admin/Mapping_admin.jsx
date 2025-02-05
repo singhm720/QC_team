@@ -77,6 +77,30 @@ const MappingAdmin = () => {
     }
   };
 
+  const handleDelete = async (row) => {
+    // Display a confirmation dialog before proceeding
+    const isConfirmed = window.confirm(`Are you sure you want to delete this Mapping: ${row.Panel}?`);
+    
+    if (!isConfirmed) {
+      return; // Exit if the user cancels the action
+    }
+  
+    // Proceed with deletion if confirmed
+    setAlert({ message: `Deleting entry with ID: ${row.id}` });
+  
+    try {
+      const response = await axios.delete(`${url}deletemappingbyid/${row.id}`);
+      if (response.status === 200) {
+        setAlert({ message: `Entry with Panel: ${row.Panel} deleted successfully!` });
+        // Optionally update your local state to reflect the deletion
+        fetchMappingData()
+      } else {
+        setAlert({ message: `Failed to delete entry with ID: ${row.id}` });
+      }
+    } catch (error) {
+      setAlert({ message: `Error deleting entry with ID: ${row.id}: ${error.message}` });
+    }
+  };
   // Filter data based on search term
   const filteredData = Array.isArray(mappingData)
     ? mappingData.filter((item) =>
@@ -121,7 +145,21 @@ const MappingAdmin = () => {
       name: "Employee Code",
       selector: row => row.Employee_Code,
       sortable: true
-    }
+    },
+    {
+      name: "Action",
+      cell: row => (
+              <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(row)}
+              >
+                  Delete
+              </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+  }
   ];
 
   return (

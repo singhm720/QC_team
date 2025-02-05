@@ -7,6 +7,7 @@ import { BsCalendar2DateFill } from "react-icons/bs";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import { decode as base64Decode } from 'base-64';
 
 const DVRNVR = () => {
   const navigate = useNavigate();
@@ -50,6 +51,15 @@ const DVRNVR = () => {
     if (mode === "edit" && recordId) {
       fetchDataForEdit(recordId); // Fetch data for editing if mode is 'edit'
     }
+
+    const mode1 = new URLSearchParams(location.search).get('mode');
+    const encryptedId = new URLSearchParams(location.search).get('id');
+      if (encryptedId) {
+          const ids = base64Decode(encryptedId); // Decrypt the ID
+          if (mode1 === "editnew") {
+          fetchDataForEdit(ids);
+        }
+      }
   }, [mode, recordId]);
 
   const fetchDataForEdit = async (id) => {
@@ -284,7 +294,17 @@ const DVRNVR = () => {
   const handleSaveAndNext = async (e) => {
     e.preventDefault();
     await handleSubmit();
-    navigate("/dashboard/senserstatus");
+    if (!validateForm()) {
+      return;
+    }
+    const mode = new URLSearchParams(location.search).get('mode');
+    const id = new URLSearchParams(location.search).get('id');
+    if (mode === 'editnew') {
+      navigate(`/dashboard/senserstatus?mode=editnew&id=${id}`);
+    }
+    else {
+      navigate("/dashboard/senserstatus");
+    }
   };
 
   return (
